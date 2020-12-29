@@ -15,7 +15,6 @@ export default
 		else
 			data = await (await api.get('/trending/movie/week')).data
 
-		console.log('[data]', data)
 		const list = data.results.map(movie => (
 		{
 			id: movie.id,
