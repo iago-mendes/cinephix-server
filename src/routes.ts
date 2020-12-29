@@ -1,19 +1,11 @@
 import express from 'express'
 
-import api from './api'
+import movies from './controllers/movies'
 
 const routes = express.Router()
 
-routes.get('/', (req, res) => res.json({message: 'Hello world!'}))
+routes.get('/', (req, res) => res.json({message: 'Welcome! This is the server of the Cinephix applications.'}))
 
-routes.get('/test', async (req, res) =>
-{
-	const params = {query: 'avengers'}
-
-	// const {data: test} = await api.get('/movie/550')
-	const {data: test} = await api.get('/search/movie', {params})
-
-	return res.json(test)
-})
+routes.get('/movies', movies.list)
 
 export default routes

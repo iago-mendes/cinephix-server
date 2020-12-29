@@ -15,12 +15,13 @@ export default
 		else
 			data = await (await api.get('/trending/movie/week')).data
 
+		console.log('[data]', data)
 		const list = data.results.map(movie => (
 		{
 			id: movie.id,
 			image: movie.poster_path ? movie.poster_path : '',
 			title: movie.title,
-			genres: movie.genres
+			genres: movie.genre_ids
 		}))
 
 		return res.json(list)

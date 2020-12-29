@@ -4,11 +4,12 @@ interface Movie
 	backdrop_path: string | null
 	belongs_to_collection: null | object
 	budget: number
-	genres: Array<
+	genres?: Array<
 	{
 		id: number
 		name: string
 	}>
+	genre_ids?: number
 	homepage: string | null
 	id: number
 	imdb_id: string | null
