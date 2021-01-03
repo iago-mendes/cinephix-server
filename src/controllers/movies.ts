@@ -2,6 +2,7 @@ import {Request, Response, NextFunction} from 'express'
 
 import api from '../api'
 import {MovieList} from '../models/Movie'
+import formatImage from '../utils/formatImage'
 
 export default
 {
@@ -18,7 +19,7 @@ export default
 		const list = data.results.map(movie => (
 		{
 			id: movie.id,
-			image: movie.poster_path ? movie.poster_path : '',
+			image: formatImage(movie.poster_path),
 			title: movie.title,
 			genres: movie.genre_ids
 		}))
