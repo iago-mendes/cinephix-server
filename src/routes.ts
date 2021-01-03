@@ -11,5 +11,6 @@ routes.get('/movies', movies.list)
 routes.get('/movies/:id', movies.show)
 
 routes.get('/tvshows', tvshows.list)
+routes.get('/tvshows/:id', tvshows.show)
 
 export default routes

@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../api'
-import {TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
+import {TvDetails, TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
 import formatImage from '../utils/formatImage'
 
 export default
@@ -57,5 +57,28 @@ export default
 		}
 
 		return res.json(list)
+	},
+
+	show: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {id} = req.params
+
+		const {data: tvshow}:{data: TvDetails} = await api.get(`/tv/${id}`)
+
+		res.json(
+		{
+			id: tvshow.id,
+			title: tvshow.name,
+			image: formatImage(tvshow.poster_path),
+			overview: tvshow.overview,
+			rating: tvshow.vote_average,
+			status: tvshow.status,
+			inProduction: tvshow.in_production,
+			startDate: tvshow.first_air_date,
+			endDate: tvshow.last_air_date,
+			seasonsNumber: tvshow.number_of_seasons,
+			episodesNumber: tvshow.number_of_episodes,
+			genres: tvshow.genres
+		})
 	}
 }
