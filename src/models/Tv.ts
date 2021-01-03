@@ -25,20 +25,20 @@ export interface TvSearchPaginated
 
 interface TvTrending
 {
-	poster_path?: string
-	adult?: boolean
-	overview?: string
-	release_date?: string
-	genre_ids?: number[]
-	id?: number
-	original_title?: string
-	original_language?: string
-	title?: string
-	backdrop_path?: string
-	popularity?: number
-	vote_count?: number
-	video?: boolean
-	vote_average?: number
+	vote_average: number
+	original_name: string
+	origin_country: string[]
+	name: string
+	backdrop_path: string
+	id: number
+	vote_count: number
+	original_language: string
+	poster_path: string
+	first_air_date: string
+	overview: string
+	genre_ids: number[]
+	popularity: number
+	media_type: string
 }
 
 export interface TvTrendingPaginated
