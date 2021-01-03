@@ -15,7 +15,8 @@ export default
 			id?: number
 			image?: string
 			title?: string
-			genres?: number[]
+			overview?: string
+			date?: string
 		}> = []
 
 		let page = 1
@@ -24,33 +25,35 @@ export default
 
 		if (search && search !== '')
 		{
-			const data: MovieSearchPaginated = await (await api.get('/search/movie', {params: {query: search, page}})).data
+			const {data: movies}:{data: MovieSearchPaginated} = await api.get('/search/movie', {params: {query: search, page}})
 
-			list = data.results.map(movie => (
+			list = movies.results.map(movie => (
 			{
 				id: movie.id,
 				image: formatImage(movie.poster_path),
 				title: movie.title,
-				genres: movie.genre_ids
+				overview: movie.overview,
+				date: movie.release_date
 			}))
 
-			res.setHeader('page', data.page)
-			res.setHeader('totalPages', data.total_pages)
+			res.setHeader('page', movies.page)
+			res.setHeader('totalPages', movies.total_pages)
 		}
 		else
 		{
-			const data: MovieTrendingPaginated = await (await api.get('/trending/movie/week', {params: {page}})).data
+			const {data: movies}:{data: MovieSearchPaginated} = await api.get('/trending/movie/week', {params: {page}})
 
-			list = data.results.map(movie => (
+			list = movies.results.map(movie => (
 			{
 				id: movie.id,
 				image: formatImage(movie.poster_path),
 				title: movie.title,
-				genres: movie.genre_ids
+				overview: movie.overview,
+				date: movie.release_date
 			}))
 
-			res.setHeader('page', data.page)
-			res.setHeader('totalPages', data.total_pages)
+			res.setHeader('page', movies.page)
+			res.setHeader('totalPages', movies.total_pages)
 		}
 
 		return res.json(list)
