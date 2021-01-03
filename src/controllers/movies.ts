@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../api'
-import {MovieSearchPaginated, MovieTrendingPaginated} from '../models/Movie'
+import {MovieSearchPaginated, MovieTrendingPaginated, MovieDetails} from '../models/Movie'
 import formatImage from '../utils/formatImage'
 
 export default
@@ -54,5 +54,30 @@ export default
 		}
 
 		return res.json(list)
+	},
+
+	show: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {id} = req.params
+
+		const {data: movie}:{data: MovieDetails} = await api.get(`/movie/${id}`)
+
+		res.json(
+		{
+			id: movie.id,
+			title: movie.title,
+			image: formatImage(movie.poster_path),
+			overview: movie.overview,
+			status: movie.status,
+			date: movie.release_date,
+			rating: movie.vote_average,
+			genres: movie.genres,
+			collection: movie.belongs_to_collection &&
+			{
+				id: movie.belongs_to_collection.id,
+				name: movie.belongs_to_collection.name,
+				image: formatImage(movie.belongs_to_collection.poster_path)
+			}
+		})
 	}
 }

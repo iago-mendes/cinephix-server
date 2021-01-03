@@ -50,11 +50,16 @@ export interface MovieTrendingPaginated
 	total_pages: number
 }
 
-interface MovieDetails
+export interface MovieDetails
 {
 	adult?: boolean
 	backdrop_path?: string
-	belongs_to_collection?: object
+	belongs_to_collection?:
+	{
+		id: number
+    name: string
+    poster_path: string
+	}
 	budget?: number
 	genres?: Array<
 	{
@@ -95,12 +100,4 @@ interface MovieDetails
 	video?: boolean
 	vote_average?: number
 	vote_count?: number
-}
-
-export interface MovieDetailsPaginated
-{
-	page: number
-	results: MovieDetails[]
-	total_results: number
-	total_pages: number
 }
