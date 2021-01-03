@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../api'
-import {MovieList} from '../models/Movie'
+import {MovieSearchPaginated, MovieTrendingPaginated} from '../models/Movie'
 import formatImage from '../utils/formatImage'
 
 export default
@@ -10,19 +10,38 @@ export default
 	{
 		const {search} = req.query
 
-		let data: MovieList
-		if (search && search !== '')
-			data = await (await api.get('/search/movie', {params: {query: search}})).data
-		else
-			data = await (await api.get('/trending/movie/week')).data
-
-		const list = data.results.map(movie => (
+		let list: Array<
 		{
-			id: movie.id,
-			image: formatImage(movie.poster_path),
-			title: movie.title,
-			genres: movie.genre_ids
-		}))
+			id?: number
+			image?: string
+			title?: string
+			genres?: number[]
+		}> = []
+
+		if (search && search !== '')
+		{
+			const data: MovieSearchPaginated = await (await api.get('/search/movie', {params: {query: search}})).data
+
+			list = data.results.map(movie => (
+			{
+				id: movie.id,
+				image: formatImage(movie.poster_path),
+				title: movie.title,
+				genres: movie.genre_ids
+			}))
+		}
+		else
+		{
+			const data: MovieTrendingPaginated = await (await api.get('/trending/movie/week')).data
+
+			list = data.results.map(movie => (
+			{
+				id: movie.id,
+				image: formatImage(movie.poster_path),
+				title: movie.title,
+				genres: movie.genre_ids
+			}))
+		}
 
 		return res.json(list)
 	}
