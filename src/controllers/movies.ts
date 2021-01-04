@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express'
 
-import api from '../api'
+import api from '../services/api'
 import {MovieSearchPaginated, MovieTrendingPaginated, MovieDetails} from '../models/Movie'
 import formatImage from '../utils/formatImage'
 
