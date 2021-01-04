@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {PersonSearchPaginated, PersonTrendingPaginated, PersonDetails} from '../models/Person'
+import {PersonSearchPaginated, PersonTrendingPaginated, PersonDetails, PersonCombinedCredits} from '../models/Person'
 import formatImage from '../utils/formatImage'
 
 export default
@@ -123,5 +123,53 @@ export default
 		}
 
 		return res.json(list)
+	},
+
+	show: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {id} = req.params
+
+		const {data: person}:{data: PersonDetails} = await api.get(`/person/${id}`)
+		const {data: credits}:{data: PersonCombinedCredits} = await api.get(`/person/${id}/combined_credits`)
+
+		function sortingRule(a: any, b: any)
+		{
+			if (Number(a.popularity) < Number(b.popularity))
+				return 1
+			else
+				return -1
+		}
+
+		return res.json(
+		{
+			id: person.id,
+			name: person.name,
+			image: formatImage(person.profile_path),
+			biography: person.biography,
+			knownForDepartment: person.known_for_department,
+			birthday: person.birthday,
+			placeOfBirth: person.place_of_birth,
+			credits:
+			{
+				cast: credits.cast.sort(sortingRule).map(media => (
+				{
+					id: media.id,
+					title: media.media_type === 'movie' ? media.title : media.name,
+					image: formatImage(media.poster_path),
+					character: media.character,
+					overview: media.overview,
+					date: media.media_type === 'movie' ? media.release_date : media.first_air_date
+				})),
+				crew: credits.crew.sort(sortingRule).map(media => (
+				{
+					id: media.id,
+					title: media.media_type === 'movie' ? media.title : media.name,
+					image: formatImage(media.poster_path),
+					overview: media.overview,
+					date: media.media_type === 'movie' ? media.release_date : media.first_air_date,
+					department: media.department
+				}))
+			}
+		})
 	}
 }
