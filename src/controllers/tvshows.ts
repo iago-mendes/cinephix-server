@@ -1,8 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {TvDetails, TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
+import {TvCredits, TvDetails, TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
 import formatImage from '../utils/formatImage'
+import sortByPopularity from '../utils/sortByPopularity'
 
 export default
 {
@@ -64,6 +65,7 @@ export default
 		const {id} = req.params
 
 		const {data: tvshow}:{data: TvDetails} = await api.get(`/tv/${id}`)
+		const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`)
 
 		res.json(
 		{
@@ -78,7 +80,24 @@ export default
 			endDate: tvshow.last_air_date,
 			seasonsNumber: tvshow.number_of_seasons,
 			episodesNumber: tvshow.number_of_episodes,
-			genres: tvshow.genres
+			genres: tvshow.genres,
+			credits:
+			{
+				cast: credits.cast.sort(sortByPopularity).map(person => (
+				{
+					id: person.id,
+					name: person.name,
+					image: formatImage(person.profile_path),
+					character: person.character
+				})),
+				crew: credits.crew.sort(sortByPopularity).map(person => (
+				{
+					id: person.id,
+					name: person.name,
+					image: formatImage(person.profile_path),
+					department: person.department
+				}))
+			}
 		})
 	}
 }
