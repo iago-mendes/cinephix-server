@@ -1,8 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {MovieSearchPaginated, MovieTrendingPaginated, MovieDetails} from '../models/Movie'
+import {MovieSearchPaginated, MovieTrendingPaginated, MovieDetails, MovieCredits} from '../models/Movie'
 import formatImage from '../utils/formatImage'
+import sortByPopularity from '../utils/sortByPopularity'
 
 export default
 {
@@ -64,6 +65,7 @@ export default
 		const {id} = req.params
 
 		const {data: movie}:{data: MovieDetails} = await api.get(`/movie/${id}`)
+		const {data: credits}:{data: MovieCredits} = await api.get(`/movie/${id}/credits`)
 
 		res.json(
 		{
@@ -74,12 +76,29 @@ export default
 			status: movie.status,
 			date: movie.release_date,
 			rating: movie.vote_average,
-			genres: movie.genres,
 			collection: movie.belongs_to_collection &&
 			{
 				id: movie.belongs_to_collection.id,
 				name: movie.belongs_to_collection.name,
 				image: formatImage(movie.belongs_to_collection.poster_path)
+			},
+			genres: movie.genres,
+			credits:
+			{
+				cast: credits.cast.sort(sortByPopularity).map(person => (
+				{
+					id: person.id,
+					name: person.name,
+					image: formatImage(person.profile_path),
+					character: person.character
+				})),
+				crew: credits.crew.sort(sortByPopularity).map(person => (
+				{
+					id: person.id,
+					name: person.name,
+					image: formatImage(person.profile_path),
+					department: person.department
+				}))
 			}
 		})
 	}
