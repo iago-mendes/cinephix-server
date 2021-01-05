@@ -74,7 +74,7 @@ export default
 		}
 		else
 		{
-			const {data: people}:{data: PersonTrendingPaginated} = await api.get('/trending/person/week', {params: {page}})
+			const {data: people}:{data: PersonTrendingPaginated} = await api.get('/trending/person/day', {params: {page}})
 
 			list = people.results.map(person =>
 			{

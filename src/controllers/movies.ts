@@ -42,7 +42,7 @@ export default
 		}
 		else
 		{
-			const {data: movies}:{data: MovieTrendingPaginated} = await api.get('/trending/movie/week', {params: {page}})
+			const {data: movies}:{data: MovieTrendingPaginated} = await api.get('/trending/movie/day', {params: {page}})
 
 			list = movies.results.map(movie => (
 			{

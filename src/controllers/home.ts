@@ -68,7 +68,7 @@ export default async function Home(req: Request, res: Response, next: NextFuncti
 
 	const {data: all}:{data: All} = (search && search !== '')
 		? await api.get('/search/multi', {params: {query: search, page}})
-		: await api.get('/trending/all/week', {params: {page}})
+		: await api.get('/trending/all/day', {params: {page}})
 
 	all.results.map(item =>
 	{

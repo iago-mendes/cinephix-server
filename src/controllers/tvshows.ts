@@ -42,7 +42,7 @@ export default
 		}
 		else
 		{
-			const {data: tvshows}:{data: TvTrendingPaginated} = await api.get('/trending/tv/week', {params: {page}})
+			const {data: tvshows}:{data: TvTrendingPaginated} = await api.get('/trending/tv/day', {params: {page}})
 
 			list = tvshows.results.map(tvshow => (
 			{
