@@ -1,10 +1,10 @@
 import {Request, Response, NextFunction} from 'express'
-import { MovieCredits, MovieDetails } from '../models/Movie'
 
 import User from '../models/User'
 import api from '../services/api'
 import formatImage from '../utils/formatImage'
 import sortByPopularity from '../utils/sortByPopularity'
+import {MovieCredits, MovieDetails} from '../models/Movie'
 
 interface Ratings
 {
