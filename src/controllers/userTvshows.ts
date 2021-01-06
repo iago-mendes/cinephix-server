@@ -1,6 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
+import { TvDetails } from '../models/Tv'
 
 import User from '../models/User'
+import api from '../services/api'
+import formatImage from '../utils/formatImage'
 
 interface Ratings
 {
@@ -71,5 +74,52 @@ export default
 
 		await User.updateOne({email}, {tvshows})
 		return res.json(tvshow)
+	},
+
+	list: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email} = req.params
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		let tvshows: Array<
+		{
+			data:
+			{
+				id?: number
+				image?: string
+				title?: string
+				overview?: string
+				date?: string
+			}
+			status: string | undefined
+			venue: string | undefined
+			ratings: Ratings
+		}> = []
+
+		const promise = user.tvshows.map(async tvshow =>
+		{
+			const {data}:{data: TvDetails} = await api.get(`/tv/${tvshow.tvshowId}`)
+
+			tvshows.push(
+			{
+				data:
+				{
+					id: data.id,
+					image: formatImage(data.poster_path),
+					title: data.name,
+					overview: data.overview,
+					date: data.first_air_date
+				},
+				status: tvshow.status,
+				venue: tvshow.venue,
+				ratings: tvshow.ratings || {}
+			})
+		})
+		await Promise.all(promise)
+
+		return res.json(tvshows)
 	}
 }

@@ -38,5 +38,6 @@ routes.get('/users/:email/movies', userMovies.list)
 routes.get('/users/:email/movies/:id', userMovies.show)
 
 routes.post('/users/:email/tvshows', userTvshows.add)
+routes.get('/users/:email/tvshows', userTvshows.list)
 
 export default routes
