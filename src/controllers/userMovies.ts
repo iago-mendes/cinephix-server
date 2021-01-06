@@ -1,6 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
+import { MovieDetails } from '../models/Movie'
 
 import User from '../models/User'
+import api from '../services/api'
+import formatImage from '../utils/formatImage'
 
 interface Ratings
 {
@@ -120,5 +123,52 @@ export default
 
 		await User.updateOne({email}, {movies})
 		return res.json(movie)
+	},
+
+	list: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email} = req.params
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		let movies: Array<
+		{
+			data:
+			{
+				id?: number
+				image?: string
+				title?: string
+				overview?: string
+				date?: string
+			}
+			watched: boolean
+			venue: string | undefined
+			ratings: Ratings
+		}> = []
+
+		const promise = user.movies.map(async movie =>
+		{
+			const {data}:{data: MovieDetails} = await api.get(`/movie/${movie.movieId}`)
+
+			movies.push(
+			{
+				data:
+				{
+					id: data.id,
+					image: formatImage(data.poster_path),
+					title: data.title,
+					overview: data.overview,
+					date: data.release_date
+				},
+				watched: movie.watched,
+				venue: movie.venue,
+				ratings: movie.ratings
+			})
+		})
+		await Promise.all(promise)
+
+		return res.json(movies)
 	}
 }

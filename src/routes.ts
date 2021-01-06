@@ -32,5 +32,6 @@ routes.delete('/users/:email', users.remove)
 
 routes.post('/users/:email/movies', userMovies.add)
 routes.put('/users/:email/movies/:id', userMovies.edit)
+routes.get('/users/:email/movies', userMovies.list)
 
 export default routes
