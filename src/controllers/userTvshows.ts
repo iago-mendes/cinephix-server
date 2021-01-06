@@ -132,6 +132,32 @@ export default
 		return res.json(tvshow)
 	},
 
+	remove: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email, id: tmpId} = req.params
+		const id = Number(tmpId)
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		let tvshowIndex: number = 0
+		const tvshow = user.tvshows.find((tvshow, index) =>
+		{
+			if (tvshow.tvshowId === id)
+				tvshowIndex = index
+			return tvshow.tvshowId === id
+		})
+		if (!tvshow)
+			return res.status(404).json({message: 'tv show not found!'})
+
+		let tvshows = user.tvshows
+		tvshows.splice(tvshowIndex, 1)
+
+		await User.updateOne({email}, {tvshows})
+		return res.json({message: 'tv show was removed!'})
+	},
+
 	list: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {email} = req.params
