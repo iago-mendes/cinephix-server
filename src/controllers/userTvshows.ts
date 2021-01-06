@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from 'express'
-import { TvDetails } from '../models/Tv'
+import {TvDetails} from '../models/Tv'
 
 import User from '../models/User'
 import api from '../services/api'
@@ -71,6 +71,62 @@ export default
 			ratings: ratings || {}
 		}
 		tvshows.push(tvshow)
+
+		await User.updateOne({email}, {tvshows})
+		return res.json(tvshow)
+	},
+
+	edit: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email, id: tmpId} = req.params
+		const {status, venue, ratings}:
+		{
+			id: number,
+			status: string | undefined,
+			venue: string | undefined,
+			ratings: Ratings | undefined
+		} = req.body
+
+		const id = Number(tmpId)
+
+		if (status && !validStatus.includes(status))
+			return res.status(400).json({message: 'provided status is invalid!'})
+		if (venue && !validVenues.includes(venue))
+			return res.status(400).json({message: 'provided venue is invalid!'})
+
+		let areRatingsValid = true
+		if (ratings)
+			Object.values(ratings).map(rating =>
+			{
+				if (rating > 10 || rating < 0)
+					areRatingsValid = false
+			})
+		if (!areRatingsValid)
+			return res.status(400).json({message: 'provided rating are invalid (ratings must be between 0 and 10)!'})
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		let tvshowIndex: number = 0
+		let tvshow = user.tvshows.find((tvshow, index) =>
+		{
+			if (tvshow.tvshowId === id)
+				tvshowIndex = index
+			return tvshow.tvshowId === id
+		})
+		if (!tvshow)
+			return res.status(404).json({message: 'tv show not found!'})
+
+		if (status)
+			tvshow.status = status
+		if (venue)
+			tvshow.venue = venue
+		if (ratings)
+			tvshow.ratings = ratings
+
+		let tvshows = user.tvshows
+		tvshows[tvshowIndex] = tvshow
 
 		await User.updateOne({email}, {tvshows})
 		return res.json(tvshow)
