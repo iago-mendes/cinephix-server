@@ -24,11 +24,25 @@ export default
 		const {email} = req.params
 
 		const user = await User.find({email})
-		if (!user)
+		if (user.length === 0)
 			return res.status(404).json({message: 'user not found!'})
 		else if (user.length > 1)
-			return res.status(409).json({message: 'there was found more than one user with the provided email'})
+			return res.status(409).json({message: 'there was found more than one user with the provided email!'})
 
 		return res.json(user[0])
+	},
+
+	remove: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email} = req.params
+
+		const user = await User.find({email})
+		if (user.length === 0)
+			return res.status(404).json({message: 'user not found!'})
+		else if (user.length > 1)
+			return res.status(409).json({message: 'there was found more than one user with the provided email!'})
+
+		await User.deleteOne(user[0])
+		return res.json({message: 'user was removed!'})
 	}
 }

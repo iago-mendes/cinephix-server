@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 export type UserType = mongoose.Document & 
 {
-	_id?: string
+	_id: string
 	email: string
 	joinedAt?: Date
 	tvshows: Array<

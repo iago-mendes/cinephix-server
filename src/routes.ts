@@ -27,5 +27,6 @@ routes.get('/celebrities/:id', celebrities.show)
 routes.post('/users', users.join)
 routes.get('/users', users.list)
 routes.get('/users/:email', users.show)
+routes.delete('/users/:email', users.remove)
 
 export default routes
