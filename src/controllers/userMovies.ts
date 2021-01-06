@@ -125,6 +125,32 @@ export default
 		return res.json(movie)
 	},
 
+	remove: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email, id: tmpId} = req.params
+		const id = Number(tmpId)
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		let movieIndex: number = 0
+		let movie = user.movies.find((movie, index) =>
+		{
+			if (movie.movieId === id)
+				movieIndex = index
+			return movie.movieId === id
+		})
+		if (!movie)
+			return res.status(404).json({message: 'movie not found!'})
+
+		let movies = user.movies
+		movies.splice(movieIndex, 1)
+
+		await User.updateOne({email}, {movies})
+		return res.json({message: 'movie was removed!'})
+	},
+
 	list: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {email} = req.params
