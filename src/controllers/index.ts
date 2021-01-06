@@ -150,7 +150,7 @@ export async function tmdb(req: Request, res: Response, next: NextFunction)
 	const path = tmpPath.split('/tmdb').join('')
 
 	const {data, headers} = method === 'GET'
-		? await api.get(path, {params: query, data: body})
+		? await api.get(path, {params: query})
 		: await api.post(path, {params: query, data: body})
 
 	return res.json({data, headers})
