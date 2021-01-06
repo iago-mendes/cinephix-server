@@ -1,9 +1,10 @@
 import {Request, Response, NextFunction} from 'express'
-import { MovieDetails } from '../models/Movie'
+import { MovieCredits, MovieDetails } from '../models/Movie'
 
 import User from '../models/User'
 import api from '../services/api'
 import formatImage from '../utils/formatImage'
+import sortByPopularity from '../utils/sortByPopularity'
 
 interface Ratings
 {
@@ -196,5 +197,63 @@ export default
 		await Promise.all(promise)
 
 		return res.json(movies)
+	},
+	
+	show: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email, id: tmpId} = req.params
+		const id = Number(tmpId)
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		const movie = user.movies.find(movie => movie.movieId === id)
+		if (!movie)
+			return res.status(404).json({message: 'movie not found!'})
+
+		const {data}:{data: MovieDetails} = await api.get(`/movie/${id}`)
+		const {data: credits}:{data: MovieCredits} = await api.get(`/movie/${id}/credits`)
+
+		return res.json(
+		{
+			data:
+			{
+				id: data.id,
+				title: data.title,
+				image: formatImage(data.poster_path),
+				overview: data.overview,
+				status: data.status,
+				date: data.release_date,
+				rating: data.vote_average,
+				collection: data.belongs_to_collection &&
+				{
+					id: data.belongs_to_collection.id,
+					name: data.belongs_to_collection.name,
+					image: formatImage(data.belongs_to_collection.poster_path)
+				},
+				genres: data.genres,
+				credits:
+				{
+					cast: credits.cast.sort(sortByPopularity).map(person => (
+					{
+						id: person.id,
+						name: person.name,
+						image: formatImage(person.profile_path),
+						character: person.character
+					})),
+					crew: credits.crew.sort(sortByPopularity).map(person => (
+					{
+						id: person.id,
+						name: person.name,
+						image: formatImage(person.profile_path),
+						department: person.department
+					}))
+				}
+			},
+			watched: movie.watched,
+			venue: movie.venue,
+			ratings: movie.ratings
+		})
 	}
 }
