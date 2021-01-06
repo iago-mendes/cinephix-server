@@ -56,7 +56,7 @@ interface All
 	total_pages: number
 }
 
-export default async function Home(req: Request, res: Response, next: NextFunction)
+export async function home(req: Request, res: Response, next: NextFunction)
 {
 	const {search, page: tmpPage} = req.query
 
@@ -142,4 +142,16 @@ export default async function Home(req: Request, res: Response, next: NextFuncti
 	res.setHeader('totalPages', all.total_pages)
 
 	return res.json(list)
+}
+
+export async function tmdb(req: Request, res: Response, next: NextFunction)
+{
+	const {path: tmpPath, query, body, method} = req
+	const path = tmpPath.split('/tmdb').join('')
+
+	const {data, headers} = method === 'GET'
+		? await api.get(path, {params: query, data: body})
+		: await api.post(path, {params: query, data: body})
+
+	return res.json({data, headers})
 }
