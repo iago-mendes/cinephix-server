@@ -6,6 +6,7 @@ import celebrities from './controllers/celebrities'
 import {home, tmdb} from './controllers'
 import users from './controllers/users'
 import userMovies from './controllers/userMovies'
+import userTvshows from './controllers/userTvshows'
 
 const routes = express.Router()
 
@@ -35,5 +36,7 @@ routes.put('/users/:email/movies/:id', userMovies.edit)
 routes.delete('/users/:email/movies/:id', userMovies.remove)
 routes.get('/users/:email/movies', userMovies.list)
 routes.get('/users/:email/movies/:id', userMovies.show)
+
+routes.post('/users/:email/tvshows', userTvshows.add)
 
 export default routes
