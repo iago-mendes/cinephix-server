@@ -36,11 +36,25 @@ export default
 		if (venue && !validVenues.includes(venue))
 			return res.status(400).json({message: 'provided venue is invalid!'})
 
+		let areRatingsValid = true
+		if (ratings)
+			Object.values(ratings).map(rating =>
+			{
+				if (rating > 10 || rating < 0)
+					areRatingsValid = false
+			})
+		if (!areRatingsValid)
+			return res.status(400).json({message: 'provided rating are invalid (ratings must be between 0 and 10)!'})
+
 		const user = await User.findOne({email})
 		if (!user)
 			return res.status(404).json({message: 'user not found!'})
 
 		let movies = [...user.movies]
+		let movieAlreadyAdded = movies.find(movie => movie.movieId === id) !== undefined
+		if (movieAlreadyAdded)
+			return res.status(400).json({message: 'movie with provided id is already added!'})
+
 		const movie =
 		{
 			movieId: id,
