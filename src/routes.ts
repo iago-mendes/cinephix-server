@@ -41,5 +41,6 @@ routes.post('/users/:email/tvshows', userTvshows.add)
 routes.put('/users/:email/tvshows/:id', userTvshows.edit)
 routes.delete('/users/:email/tvshows/:id', userTvshows.remove)
 routes.get('/users/:email/tvshows', userTvshows.list)
+routes.get('/users/:email/tvshows/:id', userTvshows.show)
 
 export default routes

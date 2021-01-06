@@ -1,9 +1,10 @@
 import {Request, Response, NextFunction} from 'express'
-import {TvDetails} from '../models/Tv'
+import {TvCredits, TvDetails} from '../models/Tv'
 
 import User from '../models/User'
 import api from '../services/api'
 import formatImage from '../utils/formatImage'
+import sortByPopularity from '../utils/sortByPopularity'
 
 interface Ratings
 {
@@ -203,5 +204,61 @@ export default
 		await Promise.all(promise)
 
 		return res.json(tvshows)
+	},
+
+	show: async (req: Request, res: Response, next: NextFunction) =>
+	{
+		const {email, id: tmpId} = req.params
+		const id = Number(tmpId)
+
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		const tvshow = user.tvshows.find(tvshow => tvshow.tvshowId === id)
+		if (!tvshow)
+			return res.status(404).json({message: 'tv show not found!'})
+
+		const {data}:{data: TvDetails} = await api.get(`/tv/${id}`)
+		const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`)
+
+		return res.json(
+		{
+			data:
+			{
+				id: data.id,
+				title: data.name,
+				image: formatImage(data.poster_path),
+				overview: data.overview,
+				rating: data.vote_average,
+				status: data.status,
+				inProduction: data.in_production,
+				startDate: data.first_air_date,
+				endDate: data.last_air_date,
+				seasonsNumber: data.number_of_seasons,
+				episodesNumber: data.number_of_episodes,
+				genres: data.genres,
+				credits:
+				{
+					cast: credits.cast.sort(sortByPopularity).map(person => (
+					{
+						id: person.id,
+						name: person.name,
+						image: formatImage(person.profile_path),
+						character: person.character
+					})),
+					crew: credits.crew.sort(sortByPopularity).map(person => (
+					{
+						id: person.id,
+						name: person.name,
+						image: formatImage(person.profile_path),
+						department: person.department
+					}))
+				}
+			},
+			status: tvshow.status,
+			venue: tvshow.venue,
+			ratings: tvshow.ratings
+		})
 	}
 }
