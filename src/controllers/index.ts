@@ -103,7 +103,14 @@ export async function home(req: Request, res: Response, next: NextFunction)
 				image?: string
 				overview?: string
 				date?: string
-			} = {}
+			} =
+			{
+				id: 1,
+				title: '',
+				image: formatImage(undefined),
+				overview: '',
+				date: ''
+			}
 
 			if (item.known_for && item.known_for.length !==0)
 			{

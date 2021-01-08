@@ -36,43 +36,52 @@ export default
 
 			list = people.results.map(person =>
 			{
-				let tmpKnownFor: Array<
+				let tmpKnownFor:
 				{
 					id?: number
 					title?: string
 					image?: string
 					overview?: string
 					date?: string
-				}> = []
-
-				person.known_for?.map(media =>
+				} =
 				{
+					id: 1,
+					title: '',
+					image: formatImage(undefined),
+					overview: '',
+					date: ''
+				}
+
+				if (person.known_for && person.known_for.length !==0)
+				{
+					const media = person.known_for[0]
+
 					if (media.media_type === 'movie')
-						tmpKnownFor.push(
+						tmpKnownFor =
 						{
 							id: media.id,
 							title: media.title,
 							image: formatImage(media.poster_path),
 							overview: media.overview,
 							date: media.release_date
-						})
+						}
 					else if (media.media_type === 'tv')
-						tmpKnownFor.push(
+						tmpKnownFor =
 						{
 							id: media.id,
 							title: media.name,
 							image: formatImage(media.poster_path),
 							overview: media.overview,
 							date: media.first_air_date
-						})
-				})
+						}
+				}
 
 				return {
 					id: person.id,
 					image: formatImage(person.profile_path),
 					name: person.name,
 					knownForDepartment: person.known_for_department,
-					knownFor: tmpKnownFor[0]
+					knownFor: tmpKnownFor
 				}
 			})
 
