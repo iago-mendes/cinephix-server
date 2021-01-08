@@ -16,7 +16,14 @@ export default
 			name?: string
 			image?: string
 			knownForDepartment?: string
-			knownFor?: any
+			knownFor?:
+			{
+				id?: number
+				title?: string
+				image?: string
+				date?: string
+				overview?: string
+			}
 		}> = []
 
 		let page = 1
@@ -65,7 +72,7 @@ export default
 					image: formatImage(person.profile_path),
 					name: person.name,
 					knownForDepartment: person.known_for_department,
-					knownFor: tmpKnownFor
+					knownFor: tmpKnownFor[0]
 				}
 			})
 
@@ -114,7 +121,7 @@ export default
 					image: formatImage(person.profile_path),
 					name: person.name,
 					knownForDepartment: person.known_for_department,
-					knownFor: tmpKnownFor
+					knownFor: tmpKnownFor[0]
 				}
 			})
 

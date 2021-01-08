@@ -96,37 +96,39 @@ export async function home(req: Request, res: Response, next: NextFunction)
 		}
 		else if (item.media_type === 'person')
 		{
-			let tmpKnownFor: Array<
+			let tmpKnownFor:
 			{
 				id?: number
 				title?: string
 				image?: string
 				overview?: string
 				date?: string
-			}> = []
+			} = {}
 
-			item.known_for?.map(media =>
+			if (item.known_for && item.known_for.length !==0)
 			{
+				const media = item.known_for[0]
+
 				if (media.media_type === 'movie')
-					tmpKnownFor.push(
+					tmpKnownFor =
 					{
 						id: media.id,
 						title: media.title,
 						image: formatImage(media.poster_path),
 						overview: media.overview,
 						date: media.release_date
-					})
+					}
 				else if (media.media_type === 'tv')
-					tmpKnownFor.push(
+					tmpKnownFor =
 					{
 						id: media.id,
 						title: media.name,
 						image: formatImage(media.poster_path),
 						overview: media.overview,
 						date: media.first_air_date
-					})
-			})
-
+					}
+			}
+			
 			list.push(
 			{
 				id: item.id,
