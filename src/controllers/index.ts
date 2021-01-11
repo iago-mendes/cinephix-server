@@ -80,7 +80,8 @@ export async function home(req: Request, res: Response, next: NextFunction)
 				image: formatImage(item.poster_path),
 				title: item.title,
 				overview: item.overview,
-				date: item.release_date
+				date: item.release_date,
+				type: 'movie'
 			})
 		}
 		else if (item.media_type === 'tv')
@@ -91,7 +92,8 @@ export async function home(req: Request, res: Response, next: NextFunction)
 				image: formatImage(item.poster_path),
 				title: item.name,
 				overview: item.overview,
-				date: item.first_air_date
+				date: item.first_air_date,
+				type: 'tvshow'
 			})
 		}
 		else if (item.media_type === 'person')
