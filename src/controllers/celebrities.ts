@@ -3,6 +3,7 @@ import {Request, Response, NextFunction} from 'express'
 import api from '../services/api'
 import {PersonListPaginated, PersonDetails, PersonCombinedCredits} from '../models/Person'
 import formatImage from '../utils/formatImage'
+import sortByPopularity from '../utils/sortByPopularity'
 
 export default
 {
@@ -82,14 +83,6 @@ export default
 		const {data: person}:{data: PersonDetails} = await api.get(`/person/${id}`)
 		const {data: credits}:{data: PersonCombinedCredits} = await api.get(`/person/${id}/combined_credits`)
 
-		function sortingRule(a: any, b: any)
-		{
-			if (Number(a.popularity) < Number(b.popularity))
-				return 1
-			else
-				return -1
-		}
-
 		return res.json(
 		{
 			id: person.id,
@@ -101,23 +94,25 @@ export default
 			placeOfBirth: person.place_of_birth,
 			credits:
 			{
-				cast: credits.cast.sort(sortingRule).map(media => (
+				cast: credits.cast.sort(sortByPopularity).map(media => (
 				{
 					id: media.id,
 					title: media.media_type === 'movie' ? media.title : media.name,
 					image: formatImage(media.poster_path),
 					character: media.character,
 					overview: media.overview,
-					date: media.media_type === 'movie' ? media.release_date : media.first_air_date
+					date: media.media_type === 'movie' ? media.release_date : media.first_air_date,
+					type : media.media_type === 'movie' ? 'movie' : 'tvshow'
 				})),
-				crew: credits.crew.sort(sortingRule).map(media => (
+				crew: credits.crew.sort(sortByPopularity).map(media => (
 				{
 					id: media.id,
 					title: media.media_type === 'movie' ? media.title : media.name,
 					image: formatImage(media.poster_path),
 					overview: media.overview,
 					date: media.media_type === 'movie' ? media.release_date : media.first_air_date,
-					department: media.department
+					department: media.department,
+					type : media.media_type === 'movie' ? 'movie' : 'tvshow'
 				}))
 			}
 		})
