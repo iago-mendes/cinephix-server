@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {PersonSearchPaginated, PersonTrendingPaginated, PersonDetails, PersonCombinedCredits} from '../models/Person'
+import {PersonListPaginated, PersonDetails, PersonCombinedCredits} from '../models/Person'
 import formatImage from '../utils/formatImage'
 
 export default
@@ -10,133 +10,67 @@ export default
 	{
 		const {search, page: tmpPage} = req.query
 
-		let list: Array<
-		{
-			id?: number
-			name?: string
-			image?: string
-			knownForDepartment?: string
-			knownFor?:
-			{
-				id?: number
-				title?: string
-				image?: string
-				date?: string
-				overview?: string
-			}
-		}> = []
-
 		let page = 1
 		if (tmpPage && Number(tmpPage) >= 1 && Number(tmpPage) <= 1000)
 			page = Number(tmpPage)
 
-		if (search && search !== '')
+		const {data: people}:{data: PersonListPaginated} = (search && search !== '')
+			? await api.get('/search/person', {params: {query: search, page}})
+			: await api.get('/trending/person/day', {params: {page}})
+
+		const list = people.results.map(person =>
 		{
-			const {data: people}:{data: PersonSearchPaginated} = await api.get('/search/person', {params: {query: search, page}})
-
-			list = people.results.map(person =>
+			let tmpKnownFor:
 			{
-				let tmpKnownFor:
-				{
-					id?: number
-					title?: string
-					image?: string
-					overview?: string
-					date?: string
-				} =
-				{
-					id: 1,
-					title: '',
-					image: formatImage(undefined),
-					overview: '',
-					date: ''
-				}
-
-				if (person.known_for && person.known_for.length !==0)
-				{
-					const media = person.known_for[0]
-
-					if (media.media_type === 'movie')
-						tmpKnownFor =
-						{
-							id: media.id,
-							title: media.title,
-							image: formatImage(media.poster_path),
-							overview: media.overview,
-							date: media.release_date
-						}
-					else if (media.media_type === 'tv')
-						tmpKnownFor =
-						{
-							id: media.id,
-							title: media.name,
-							image: formatImage(media.poster_path),
-							overview: media.overview,
-							date: media.first_air_date
-						}
-				}
-
-				return {
-					id: person.id,
-					image: formatImage(person.profile_path),
-					name: person.name,
-					knownForDepartment: person.known_for_department,
-					knownFor: tmpKnownFor
-				}
-			})
-
-			res.setHeader('page', people.page)
-			res.setHeader('totalPages', people.total_pages)
-		}
-		else
-		{
-			const {data: people}:{data: PersonTrendingPaginated} = await api.get('/trending/person/day', {params: {page}})
-
-			list = people.results.map(person =>
+				id?: number
+				title?: string
+				image?: string
+				overview?: string
+				date?: string
+			} =
 			{
-				let tmpKnownFor: Array<
-				{
-					id?: number
-					title?: string
-					image?: string
-					overview?: string
-					date?: string
-				}> = []
+				id: 1,
+				title: '',
+				image: formatImage(undefined),
+				overview: '',
+				date: ''
+			}
 
-				person.known_for?.map(media =>
-				{
-					if (media.media_type === 'movie')
-						tmpKnownFor.push(
-						{
-							id: media.id,
-							title: media.title,
-							image: formatImage(media.poster_path),
-							overview: media.overview,
-							date: media.release_date
-						})
-					else if (media.media_type === 'tv')
-						tmpKnownFor.push(
-						{
-							id: media.id,
-							title: media.name,
-							image: formatImage(media.poster_path),
-							overview: media.overview,
-							date: media.first_air_date
-						})
-				})
+			if (person.known_for && person.known_for.length !==0)
+			{
+				const media = person.known_for[0]
 
-				return {
-					id: person.id,
-					image: formatImage(person.profile_path),
-					name: person.name,
-					knownForDepartment: person.known_for_department,
-					knownFor: tmpKnownFor[0]
-				}
-			})
+				if (media.media_type === 'movie')
+					tmpKnownFor =
+					{
+						id: media.id,
+						title: media.title,
+						image: formatImage(media.poster_path),
+						overview: media.overview,
+						date: media.release_date
+					}
+				else if (media.media_type === 'tv')
+					tmpKnownFor =
+					{
+						id: media.id,
+						title: media.name,
+						image: formatImage(media.poster_path),
+						overview: media.overview,
+						date: media.first_air_date
+					}
+			}
 
-			res.setHeader('page', people.page)
-			res.setHeader('totalPages', people.total_pages)
-		}
+			return {
+				id: person.id,
+				image: formatImage(person.profile_path),
+				name: person.name,
+				knownForDepartment: person.known_for_department,
+				knownFor: tmpKnownFor
+			}
+		})
+
+		res.setHeader('page', people.page)
+		res.setHeader('totalPages', people.total_pages)
 
 		return res.json(list)
 	},
