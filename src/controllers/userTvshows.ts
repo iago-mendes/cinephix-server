@@ -16,6 +16,15 @@ interface Ratings
 	musicAndSound?: number
 }
 
+interface ListedTvshow
+{
+	id?: number
+	image?: string
+	title?: string
+	venue: string | undefined
+	ratings: Ratings
+}
+
 const validStatus =
 [
 	'Watch list',	'Watching',	'Waiting',	'Completed',	'Stopped',	'Paused'
@@ -33,14 +42,14 @@ export default
 		const {id, status, venue, ratings}:
 		{
 			id: number,
-			status: string | undefined,
+			status: string,
 			venue: string | undefined,
 			ratings: Ratings | undefined
 		} = req.body
 
 		if (typeof id !== typeof 0)
 			return res.status(400).json({message: 'provided id is invalid!'})
-		if (status && !validStatus.includes(status))
+		if (!status && !validStatus.includes(status))
 			return res.status(400).json({message: 'provided status is invalid!'})
 		if (venue && !validVenues.includes(venue))
 			return res.status(400).json({message: 'provided venue is invalid!'})
@@ -73,17 +82,32 @@ export default
 		}
 		tvshows.push(tvshow)
 
-		await User.updateOne({email}, {tvshows})
+		let tvshowStatus = user.tvshowStatus
+		if (status === 'Watch list')
+			tvshowStatus.watchList.push(tvshow.tvshowId)
+		if (status === 'Watching')
+			tvshowStatus.watching.push(tvshow.tvshowId)
+		if (status === 'Waiting')
+			tvshowStatus.waiting.push(tvshow.tvshowId)
+		if (status === 'Completed')
+			tvshowStatus.completed.push(tvshow.tvshowId)
+		if (status === 'Stopped')
+			tvshowStatus.stopped.push(tvshow.tvshowId)
+		if (status === 'Paused')
+			tvshowStatus.paused.push(tvshow.tvshowId)
+
+		await User.updateOne({email}, {tvshows, tvshowStatus})
 		return res.json(tvshow)
 	},
 
 	edit: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {email, id: tmpId} = req.params
-		const {status, venue, ratings}:
+		const {status, statusIndex, venue, ratings}:
 		{
 			id: number,
 			status: string | undefined,
+			statusIndex: number | undefined,
 			venue: string | undefined,
 			ratings: Ratings | undefined
 		} = req.body
@@ -119,8 +143,79 @@ export default
 		if (!tvshow)
 			return res.status(404).json({message: 'tv show not found!'})
 
+		let tvshowStatus = user.tvshowStatus
 		if (status)
+		{
+			const previousStatus = tvshow.status
 			tvshow.status = status
+			console.log('[previousStatus]', previousStatus)
+
+			if (status === 'Watch list' || previousStatus === 'Watch list')
+			{
+				const previous = tvshowStatus.watchList.findIndex(tvshowId => tvshowId === id)
+				if (previous > 0)
+					tvshowStatus.watchList.splice(previous, 1)
+
+				statusIndex
+				? tvshowStatus.watchList.splice(statusIndex, 0, tvshow.tvshowId)
+				: tvshowStatus.watchList.push(tvshow.tvshowId)
+			}
+			if (status === 'Watching' || previousStatus === 'Watching')
+			{
+				const previous = tvshowStatus.watching.findIndex(tvshowId => tvshowId === id)
+				if (previous > 0)
+					tvshowStatus.watching.splice(previous, 1)
+
+				statusIndex
+				? tvshowStatus.watching.splice(statusIndex, 0, tvshow.tvshowId)
+				: tvshowStatus.watching.push(tvshow.tvshowId)
+			}
+			if (status === 'Waiting' || previousStatus === 'Waiting')
+			{
+				const previous = tvshowStatus.waiting.findIndex(tvshowId => tvshowId === id)
+				if (previous > 0)
+				{
+					console.log('stopped in waiting!!!!!')
+					tvshowStatus.waiting.splice(previous, 1)
+				}
+				else
+					console.log('passed waiting!!!!!')
+
+				statusIndex
+				? tvshowStatus.waiting.splice(statusIndex, 0, tvshow.tvshowId)
+				: tvshowStatus.waiting.push(tvshow.tvshowId)
+			}
+			if (status === 'Completed' || previousStatus === 'Completed')
+			{
+				const previous = tvshowStatus.completed.findIndex(tvshowId => tvshowId === id)
+				if (previous > 0)
+					tvshowStatus.completed.splice(previous, 1)
+
+				statusIndex
+				? tvshowStatus.completed.splice(statusIndex, 0, tvshow.tvshowId)
+				: tvshowStatus.completed.push(tvshow.tvshowId)
+			}
+			if (status === 'Stopped' || previousStatus === 'Stopped')
+			{
+				const previous = tvshowStatus.stopped.findIndex(tvshowId => tvshowId === id)
+				if (previous > 0)
+					tvshowStatus.stopped.splice(previous, 1)
+
+				statusIndex
+				? tvshowStatus.stopped.splice(statusIndex, 0, tvshow.tvshowId)
+				: tvshowStatus.stopped.push(tvshow.tvshowId)
+			}
+			if (status === 'Paused' || previousStatus === 'Paused')
+			{
+				const previous = tvshowStatus.paused.findIndex(tvshowId => tvshowId === id)
+				if (previous > 0)
+					tvshowStatus.paused.splice(previous, 1)
+
+				statusIndex
+				? tvshowStatus.paused.splice(statusIndex, 0, tvshow.tvshowId)
+				: tvshowStatus.paused.push(tvshow.tvshowId)
+			}
+		}
 		if (venue)
 			tvshow.venue = venue
 		if (ratings)
@@ -129,7 +224,9 @@ export default
 		let tvshows = user.tvshows
 		tvshows[tvshowIndex] = tvshow
 
-		await User.updateOne({email}, {tvshows})
+		console.log('[tvshowStatus]', tvshowStatus)
+
+		await User.updateOne({email}, {tvshows, tvshowStatus})
 		return res.json(tvshow)
 	},
 
@@ -167,43 +264,49 @@ export default
 		if (!user)
 			return res.status(404).json({message: 'user not found!'})
 
-		let tvshows: Array<
-		{
-			data:
-			{
-				id?: number
-				image?: string
-				title?: string
-				overview?: string
-				date?: string
-			}
-			status: string | undefined
-			venue: string | undefined
-			ratings: Ratings
-		}> = []
+		let tvshows: {[id: number]: ListedTvshow} = {}
 
 		const promise = user.tvshows.map(async tvshow =>
 		{
 			const {data}:{data: TvDetails} = await api.get(`/tv/${tvshow.tvshowId}`)
 
-			tvshows.push(
+			tvshows[Number(data.id)] =
 			{
-				data:
-				{
-					id: data.id,
-					image: formatImage(data.poster_path),
-					title: data.name,
-					overview: data.overview,
-					date: data.first_air_date
-				},
-				status: tvshow.status,
+				id: data.id,
+				image: formatImage(data.poster_path),
+				title: data.name,
 				venue: tvshow.venue,
 				ratings: tvshow.ratings || {}
-			})
+			}
 		})
 		await Promise.all(promise)
 
-		return res.json(tvshows)
+		let list:
+		{
+			watchList: ListedTvshow[],
+			watching: ListedTvshow[],
+			waiting: ListedTvshow[],
+			completed: ListedTvshow[],
+			stopped: ListedTvshow[],
+			paused: ListedTvshow[]
+		} =
+		{
+			watchList: [],
+			watching: [],
+			waiting: [],
+			completed: [],
+			stopped: [],
+			paused: []
+		}
+
+		list.watchList = user.tvshowStatus.watchList.map((id) => tvshows[id])
+		list.watching = user.tvshowStatus.watching.map((id) => tvshows[id])
+		list.waiting = user.tvshowStatus.waiting.map((id) => tvshows[id])
+		list.completed = user.tvshowStatus.completed.map((id) => tvshows[id])
+		list.stopped = user.tvshowStatus.stopped.map((id) => tvshows[id])
+		list.paused = user.tvshowStatus.paused.map((id) => tvshows[id])
+
+		return res.json(list)
 	},
 
 	show: async (req: Request, res: Response, next: NextFunction) =>

@@ -38,6 +38,15 @@ export type UserType = mongoose.Document &
 			musicAndSound?: number
 		}
 	}>
+	tvshowStatus:
+	{
+		watchList: number[]
+		watching: number[]
+		waiting: number[]
+		completed: number[]
+		stopped: number[]
+		paused: number[]
+	}
 }
 
 const UserSchema = new mongoose.Schema(
@@ -76,7 +85,16 @@ const UserSchema = new mongoose.Schema(
 			cinematography: {type: Number, required: false},
 			musicAndSound: {type: Number, required: false}
 		}
-	}]
+	}],
+	tvshowStatus:
+	{
+		watchList: [{type: Number}],
+		watching: [{type: Number}],
+		waiting: [{type: Number}],
+		completed: [{type: Number}],
+		stopped: [{type: Number}],
+		paused: [{type: Number}]
+	}
 })
 
 export default mongoose.model<UserType>('User', UserSchema)
