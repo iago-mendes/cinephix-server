@@ -40,12 +40,7 @@ export type UserType = mongoose.Document &
 	}>
 	tvshowStatus:
 	{
-		watchList: number[]
-		watching: number[]
-		waiting: number[]
-		completed: number[]
-		stopped: number[]
-		paused: number[]
+		[status: string]: number[]
 	}
 }
 

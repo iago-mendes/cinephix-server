@@ -27,7 +27,7 @@ interface ListedTvshow
 
 const validStatus =
 [
-	'Watch list',	'Watching',	'Waiting',	'Completed',	'Stopped',	'Paused'
+	'watchList',	'watching',	'waiting',	'completed',	'stopped',	'paused'
 ]
 const validVenues =
 [
@@ -281,30 +281,13 @@ export default
 		})
 		await Promise.all(promise)
 
-		let list:
-		{
-			watchList: ListedTvshow[],
-			watching: ListedTvshow[],
-			waiting: ListedTvshow[],
-			completed: ListedTvshow[],
-			stopped: ListedTvshow[],
-			paused: ListedTvshow[]
-		} =
-		{
-			watchList: [],
-			watching: [],
-			waiting: [],
-			completed: [],
-			stopped: [],
-			paused: []
-		}
+		let list: {[status: string]: ListedTvshow[]} = {}
 
-		list.watchList = user.tvshowStatus.watchList.map((id) => tvshows[id])
-		list.watching = user.tvshowStatus.watching.map((id) => tvshows[id])
-		list.waiting = user.tvshowStatus.waiting.map((id) => tvshows[id])
-		list.completed = user.tvshowStatus.completed.map((id) => tvshows[id])
-		list.stopped = user.tvshowStatus.stopped.map((id) => tvshows[id])
-		list.paused = user.tvshowStatus.paused.map((id) => tvshows[id])
+		validStatus.map(status =>
+		{
+			list[status] = user.tvshowStatus[status].map((id) => tvshows[id])
+			console.log('[list[status]]', list[status])
+		})
 
 		return res.json(list)
 	},
