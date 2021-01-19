@@ -49,7 +49,7 @@ export default
 
 		if (typeof id !== typeof 0)
 			return res.status(400).json({message: 'provided id is invalid!'})
-		if (!status && !validStatus.includes(status))
+		if (!status || !validStatus.includes(status))
 			return res.status(400).json({message: 'provided status is invalid!'})
 		if (venue && !validVenues.includes(venue))
 			return res.status(400).json({message: 'provided venue is invalid!'})
@@ -83,18 +83,7 @@ export default
 		tvshows.push(tvshow)
 
 		let tvshowStatus = user.tvshowStatus
-		if (status === 'Watch list')
-			tvshowStatus.watchList.push(tvshow.tvshowId)
-		if (status === 'Watching')
-			tvshowStatus.watching.push(tvshow.tvshowId)
-		if (status === 'Waiting')
-			tvshowStatus.waiting.push(tvshow.tvshowId)
-		if (status === 'Completed')
-			tvshowStatus.completed.push(tvshow.tvshowId)
-		if (status === 'Stopped')
-			tvshowStatus.stopped.push(tvshow.tvshowId)
-		if (status === 'Paused')
-			tvshowStatus.paused.push(tvshow.tvshowId)
+		tvshowStatus[status].unshift(tvshow.tvshowId)
 
 		await User.updateOne({email}, {tvshows, tvshowStatus})
 		return res.json(tvshow)
