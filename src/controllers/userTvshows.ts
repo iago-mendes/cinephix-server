@@ -146,75 +146,22 @@ export default
 		let tvshowStatus = user.tvshowStatus
 		if (status)
 		{
-			const previousStatus = tvshow.status
 			tvshow.status = status
-			console.log('[previousStatus]', previousStatus)
 
-			if (status === 'Watch list' || previousStatus === 'Watch list')
+			validStatus.map(statusKey =>
 			{
-				const previous = tvshowStatus.watchList.findIndex(tvshowId => tvshowId === id)
-				if (previous > 0)
-					tvshowStatus.watchList.splice(previous, 1)
+				const previousIndex = tvshowStatus[statusKey].findIndex(tvshowId => tvshowId === id)
+				console.log('[previousIndex]', previousIndex)
+				if (previousIndex >= 0)
+					tvshowStatus[statusKey].splice(previousIndex, 1)
 
-				statusIndex
-				? tvshowStatus.watchList.splice(statusIndex, 0, tvshow.tvshowId)
-				: tvshowStatus.watchList.push(tvshow.tvshowId)
-			}
-			if (status === 'Watching' || previousStatus === 'Watching')
-			{
-				const previous = tvshowStatus.watching.findIndex(tvshowId => tvshowId === id)
-				if (previous > 0)
-					tvshowStatus.watching.splice(previous, 1)
-
-				statusIndex
-				? tvshowStatus.watching.splice(statusIndex, 0, tvshow.tvshowId)
-				: tvshowStatus.watching.push(tvshow.tvshowId)
-			}
-			if (status === 'Waiting' || previousStatus === 'Waiting')
-			{
-				const previous = tvshowStatus.waiting.findIndex(tvshowId => tvshowId === id)
-				if (previous > 0)
+				if (status === statusKey && tvshow)
 				{
-					console.log('stopped in waiting!!!!!')
-					tvshowStatus.waiting.splice(previous, 1)
+					statusIndex
+					? tvshowStatus[status].splice(statusIndex, 0, tvshow.tvshowId)
+					: tvshowStatus[status].unshift(tvshow.tvshowId)
 				}
-				else
-					console.log('passed waiting!!!!!')
-
-				statusIndex
-				? tvshowStatus.waiting.splice(statusIndex, 0, tvshow.tvshowId)
-				: tvshowStatus.waiting.push(tvshow.tvshowId)
-			}
-			if (status === 'Completed' || previousStatus === 'Completed')
-			{
-				const previous = tvshowStatus.completed.findIndex(tvshowId => tvshowId === id)
-				if (previous > 0)
-					tvshowStatus.completed.splice(previous, 1)
-
-				statusIndex
-				? tvshowStatus.completed.splice(statusIndex, 0, tvshow.tvshowId)
-				: tvshowStatus.completed.push(tvshow.tvshowId)
-			}
-			if (status === 'Stopped' || previousStatus === 'Stopped')
-			{
-				const previous = tvshowStatus.stopped.findIndex(tvshowId => tvshowId === id)
-				if (previous > 0)
-					tvshowStatus.stopped.splice(previous, 1)
-
-				statusIndex
-				? tvshowStatus.stopped.splice(statusIndex, 0, tvshow.tvshowId)
-				: tvshowStatus.stopped.push(tvshow.tvshowId)
-			}
-			if (status === 'Paused' || previousStatus === 'Paused')
-			{
-				const previous = tvshowStatus.paused.findIndex(tvshowId => tvshowId === id)
-				if (previous > 0)
-					tvshowStatus.paused.splice(previous, 1)
-
-				statusIndex
-				? tvshowStatus.paused.splice(statusIndex, 0, tvshow.tvshowId)
-				: tvshowStatus.paused.push(tvshow.tvshowId)
-			}
+			})
 		}
 		if (venue)
 			tvshow.venue = venue
