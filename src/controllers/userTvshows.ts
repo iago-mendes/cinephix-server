@@ -151,7 +151,6 @@ export default
 			validStatus.map(statusKey =>
 			{
 				const previousIndex = tvshowStatus[statusKey].findIndex(tvshowId => tvshowId === id)
-				console.log('[previousIndex]', previousIndex)
 				if (previousIndex >= 0)
 					tvshowStatus[statusKey].splice(previousIndex, 1)
 
@@ -170,8 +169,6 @@ export default
 
 		let tvshows = user.tvshows
 		tvshows[tvshowIndex] = tvshow
-
-		console.log('[tvshowStatus]', tvshowStatus)
 
 		await User.updateOne({email}, {tvshows, tvshowStatus})
 		return res.json(tvshow)
@@ -233,7 +230,6 @@ export default
 		validStatus.map(status =>
 		{
 			list[status] = user.tvshowStatus[status].map((id) => tvshows[id])
-			console.log('[list[status]]', list[status])
 		})
 
 		return res.json(list)
