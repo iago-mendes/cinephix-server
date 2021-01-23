@@ -185,7 +185,10 @@ export default
 		let tvshows = user.tvshows
 		tvshows.splice(tvshowIndex, 1)
 
-		await User.updateOne({email}, {tvshows})
+		let tvshowStatus = user.tvshowStatus
+		tvshowStatus[tvshow.status] = tvshowStatus[tvshow.status].filter((tmpId) => tmpId !== id)
+
+		await User.updateOne({email}, {tvshows, tvshowStatus})
 		return res.json({message: 'tv show was removed!'})
 	},
 

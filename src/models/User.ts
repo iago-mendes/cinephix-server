@@ -25,7 +25,7 @@ export type UserType = mongoose.Document &
 	{
 		tvshowId: number
 
-		status?: string
+		status: string
 		venue?: string
 
 		ratings?:
@@ -68,7 +68,7 @@ const UserSchema = new mongoose.Schema(
 	[{
 		tvshowId: {type: Number, required: true, unique: true},
 
-		status: {type: String, required: false},
+		status: {type: String, required: true},
 		venue: {type: String, required: false},
 		
 		ratings:
