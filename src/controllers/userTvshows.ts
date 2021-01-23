@@ -218,7 +218,13 @@ export default
 
 		validStatus.map(status =>
 		{
-			list[status] = user.tvshowStatus[status].map((id) => tvshows[id])
+			list[status] = []
+
+			user.tvshowStatus[status].map((id) =>
+			{
+				if (tvshows[id])
+					list[status].push(tvshows[id])
+			})
 		})
 
 		return res.json(list)
