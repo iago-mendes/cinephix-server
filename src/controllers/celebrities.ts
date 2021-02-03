@@ -41,7 +41,7 @@ export default
 			{
 				const media = person.known_for[0]
 
-				if (media.media_type === 'movie')
+				if (media && media.media_type === 'movie')
 					tmpKnownFor =
 					{
 						id: media.id,
@@ -50,7 +50,7 @@ export default
 						overview: media.overview,
 						date: media.release_date
 					}
-				else if (media.media_type === 'tv')
+				else if (media && media.media_type === 'tv')
 					tmpKnownFor =
 					{
 						id: media.id,
