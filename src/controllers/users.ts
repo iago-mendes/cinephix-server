@@ -11,9 +11,9 @@ const users =
 		const user = await User.findOne({email})
 
 		if (user)
-			users.update(req, res)
+			return users.update(req, res)
 		else
-			users.join(req, res)
+			return users.join(req, res)
 	},
 
 	join: async (req: Request, res: Response) =>
@@ -21,6 +21,10 @@ const users =
 		const {email} = req.params
 		const {image, name} = req.body
 		const date = Date.now()
+
+		const userExists = await User.findOne({email})
+		if (userExists)
+			return res.status(400).json({message: `User with email '${email}' already exists!`})
 
 		const user = await User.create({email, image, name, joinedAt: date, movies: [], tvshows: []})
 		return res.json(user)
@@ -41,7 +45,7 @@ const users =
 			name: name ? name : user.name
 		}
 
-		await User.create(data)
+		await User.findOneAndUpdate({email}, data)
 		return res.send()
 	},
 
