@@ -4,6 +4,8 @@ export type UserType = mongoose.Document &
 {
 	_id: string
 	email: string
+	image?: string
+	name?: string
 	joinedAt?: Date
 	movies: Array<
 	{
@@ -47,6 +49,8 @@ export type UserType = mongoose.Document &
 const UserSchema = new mongoose.Schema(
 {
 	email: {type: String, required: true, unique: true},
+	image: {type: String},
+	name: {type: String},
 	joinedAt: {type: Date, default: Date.now()},
 	movies:
 	[{

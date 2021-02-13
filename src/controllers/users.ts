@@ -6,10 +6,10 @@ export default
 {
 	join: async (req: Request, res: Response, next: NextFunction) =>
 	{
-		const {email} = req.body
+		const {email, image, name} = req.body
 		const date = Date.now()
 
-		const user = await User.create({email, joinedAt: date, movies: [], tvshows: []})
+		const user = await User.create({email, image, name, joinedAt: date, movies: [], tvshows: []})
 		return res.json(user)
 	},
 
