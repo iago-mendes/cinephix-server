@@ -15,6 +15,9 @@ export default
 		if (tmpPage && Number(tmpPage) >= 1 && Number(tmpPage) <= 1000)
 			page = Number(tmpPage)
 
+		if (search && String(search).length > 100)
+			return res.status(400).json({message: 'Your search query has more than 100 characters!'})
+
 		const {data: people}:{data: PersonListPaginated} = (search && search !== '')
 			? await api.get('/search/person', {params: {query: search, page}})
 			: await api.get('/trending/person/day', {params: {page}})

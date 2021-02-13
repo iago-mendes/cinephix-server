@@ -65,6 +65,9 @@ export async function home(req: Request, res: Response, next: NextFunction)
 	let page = 1
 	if (tmpPage && Number(tmpPage) >= 1 && Number(tmpPage) <= 1000)
 		page = Number(tmpPage)
+	
+	if (search && String(search).length > 100)
+		return res.status(400).json({message: 'Your search query has more than 100 characters!'})
 
 	const {data: all}:{data: All} = (search && search !== '')
 		? await api.get('/search/multi', {params: {query: search, page}})

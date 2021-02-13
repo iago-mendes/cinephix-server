@@ -24,6 +24,9 @@ export default
 		if (tmpPage && Number(tmpPage) >= 1 && Number(tmpPage) <= 1000)
 			page = Number(tmpPage)
 
+		if (search && String(search).length > 100)
+			return res.status(400).json({message: 'Your search query has more than 100 characters!'})
+
 		if (search && search !== '')
 		{
 			const {data: tvshows}:{data: TvSearchPaginated} = await api.get('/search/tv', {params: {query: search, page}})
