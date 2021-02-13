@@ -33,7 +33,7 @@ const users =
 	update: async (req: Request, res: Response) =>
 	{
 		const {email} = req.params
-		const {image, name} = req.body
+		const {image, name, changedName} = req.body
 
 		const user = await User.findOne({email})
 		if (!user)
@@ -42,7 +42,8 @@ const users =
 		const data =
 		{
 			image: image ? image : user.image,
-			name: name ? name : user.name
+			name: name && (!user.changedName || changedName === true) ? name : user.name,
+			changedName: !user.changedName ? changedName === true : true
 		}
 
 		await User.findOneAndUpdate({email}, data)

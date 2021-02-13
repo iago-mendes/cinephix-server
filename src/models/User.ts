@@ -6,6 +6,7 @@ export type UserType = mongoose.Document &
 	email: string
 	image?: string
 	name?: string
+	changedName: boolean
 	joinedAt?: Date
 	movies: Array<
 	{
@@ -51,6 +52,7 @@ const UserSchema = new mongoose.Schema(
 	email: {type: String, required: true, unique: true},
 	image: {type: String},
 	name: {type: String},
+	changedName: {type: Boolean, default: false},
 	joinedAt: {type: Date, default: Date.now()},
 	movies:
 	[{
