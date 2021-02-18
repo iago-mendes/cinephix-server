@@ -13,8 +13,7 @@ export type GroupType = mongoose.Document &
 		predictions: Array<
 		{
 			category: string
-			media?: number
-			celebrity?: number
+			candidate: string
 		}>
 	}>
 }
@@ -30,9 +29,8 @@ const GroupSchema = new mongoose.Schema(
 		email: {type: String, required: true},
 		predictions:
 		[{
-			category: {type: String, required: true},
-			media: {type: Number},
-			celebrity: {type: Number}
+			category: {type: mongoose.Schema.Types.ObjectId, ref: 'Event.categories', required: true},
+			candidate: {type: mongoose.Schema.Types.ObjectId, ref: 'Event.categories.candidates', required: true},
 		}]
 	}]
 })
