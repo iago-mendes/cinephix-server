@@ -287,5 +287,26 @@ export default
 			venue: tvshow.venue,
 			ratings: tvshow.ratings
 		})
+	},
+
+	sortStatus: async (req: Request, res: Response) =>
+	{
+		const {email, key: status} = req.params
+		const {tvshows}:{tvshows: number[]} = req.body
+
+		if (!status || !validStatus.includes(status))
+			return res.status(400).json({message: 'Provided status is invalid!'})
+		if (!tvshows)
+			return res.status(400).json({message: 'You need to provide a list of tvshows indexes!'})
+		
+		const user = await User.findOne({email})
+		if (!user)
+			return res.status(404).json({message: 'user not found!'})
+
+		let tvshowStatus = user.tvshowStatus
+		tvshowStatus[status] = tvshows
+
+		await User.updateOne({email}, {tvshowStatus})
+		return res.send()
 	}
 }
