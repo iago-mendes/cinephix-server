@@ -1,9 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {TvCredits, TvDetails, TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
+import {TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
 import formatImage from '../utils/formatImage'
-import sortByPopularity from '../utils/sortByPopularity'
+import {showTvshow} from '../services/tmdb/tvshows'
 
 export default
 {
@@ -66,41 +66,8 @@ export default
 	show: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {id} = req.params
+		const tvshow = await showTvshow(Number(id))
 
-		const {data: tvshow}:{data: TvDetails} = await api.get(`/tv/${id}`)
-		const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`)
-
-		res.json(
-		{
-			id: tvshow.id,
-			title: tvshow.name,
-			image: formatImage(tvshow.poster_path),
-			overview: tvshow.overview,
-			rating: tvshow.vote_average,
-			status: tvshow.status,
-			inProduction: tvshow.in_production,
-			startDate: tvshow.first_air_date,
-			endDate: tvshow.last_air_date,
-			seasonsNumber: tvshow.number_of_seasons,
-			episodesNumber: tvshow.number_of_episodes,
-			genres: tvshow.genres,
-			credits:
-			{
-				cast: credits.cast.sort(sortByPopularity).map(person => (
-				{
-					id: person.id,
-					name: person.name,
-					image: formatImage(person.profile_path),
-					character: person.character
-				})),
-				crew: credits.crew.sort(sortByPopularity).map(person => (
-				{
-					id: person.id,
-					name: person.name,
-					image: formatImage(person.profile_path),
-					department: person.department
-				}))
-			}
-		})
+		return tvshow
 	}
 }
