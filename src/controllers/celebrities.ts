@@ -1,10 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {PersonListPaginated, PersonDetails, PersonCombinedCredits} from '../models/Person'
+import {PersonListPaginated} from '../models/Person'
 import formatImage from '../utils/formatImage'
-import sortByPopularity from '../utils/sortByPopularity'
-import { showCelebrity } from '../services/tmdb/celebrities'
+import {showCelebrity} from '../services/tmdb/celebrities'
 
 export default
 {
