@@ -9,8 +9,10 @@ export type EventType = mongoose.Document &
 	description: string
 	categories: Array<
 	{
-		_id: string
-		type: string
+		_id?: string
+		name: string
+		description: string
+		type: string // 'movies' | 'tvshows' | 'celebrities'
 		candidates: number[]
 	}>
 }
@@ -23,6 +25,8 @@ const EventSchema = new mongoose.Schema(
 	description: {type: String, required: true},
 	categories:
 	[{
+		name: {type: String, required: true},
+		description: {type: String, required: true},
 		type: {type: String, required: true},
 		candidates: [{type: Number}]
 	}]

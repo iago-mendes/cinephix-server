@@ -2,6 +2,24 @@ import {Request, Response} from 'express'
 
 import Event from '../models/Event'
 
+interface Media
+{
+	id: number
+	image: string
+	title: string
+	overview: string
+	date: string
+	type?: string
+}
+
+interface Celebrity
+{
+	id: number
+	image: string
+	name: string
+	media: Media
+}
+
 const events =
 {
 	create: async (req: Request, res: Response) =>
@@ -64,11 +82,55 @@ const events =
 			id: event.id,
 			name: event.name,
 			color: event.color,
-			description: event.description,
-			categories: event.categories
+			description: event.description
 		}))
 
 		return res.json(events)
+	},
+
+	show: async (req: Request, res: Response) =>
+	{
+		const {id} = req.params
+
+		const rawEvent = await Event.findOne({id})
+		if (!rawEvent)
+			return res.status(404).json({message: 'Event not found!'})
+
+		interface Media
+		{
+			id: number
+			image: string
+			title: string
+			overview: string
+			date: string
+		}
+		
+		interface Celebrity
+		{
+			id: number
+			image: string
+			name: string
+			media: Media
+		}
+
+		const categories:
+		{
+			name: string
+			description: string
+			type: string 
+			candidates: Array<Media | Celebrity>
+		}[] = []
+
+		const event =
+		{
+			id: rawEvent.id,
+			name: rawEvent.name,
+			color: rawEvent.color,
+			description: rawEvent.description,
+			categories
+		}
+
+		return res.json(event)
 	}
 }
 
