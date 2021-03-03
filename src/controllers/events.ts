@@ -18,7 +18,7 @@ const events =
 		}
 
 		const created = await Event.create(event)
-		return res.json(created)
+		return res.status(201).json(created)
 	},
 
 	update: async (req: Request, res: Response) =>
@@ -38,8 +38,24 @@ const events =
 			categories: categories ? categories : previous.categories
 		}
 
-		const updated = await Event.updateOne({id}, event, {new: true})
+		const updated = await Event.updateOne({id}, event)
 		return res.json(updated)
+	},
+
+	list: async (req: Request, res: Response) =>
+	{
+		const rawEvents = await Event.find()
+
+		const events = rawEvents.map(event => (
+		{
+			id: event.id,
+			name: event.name,
+			color: event.color,
+			description: event.description,
+			categories: event.categories
+		}))
+
+		return res.json(events)
 	}
 }
 
