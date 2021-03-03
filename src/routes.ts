@@ -8,6 +8,7 @@ import users from './controllers/users'
 import userMovies from './controllers/userMovies'
 import userTvshows from './controllers/userTvshows'
 import checkKey from './middlewares/checkKey'
+import events from './controllers/events'
 
 const routes = express.Router()
 
@@ -46,5 +47,7 @@ routes.delete('/users/:email/tvshows/:id', checkKey, userTvshows.remove)
 routes.get('/users/:email/tvshows', checkKey, userTvshows.list)
 routes.put('/users/:email/tvshows/status/:key', checkKey, userTvshows.sortStatus)
 routes.get('/users/:email/tvshows/:id', checkKey, userTvshows.show)
+
+routes.post('/events', checkKey, events.create)
 
 export default routes
