@@ -4,6 +4,7 @@ import api from '../services/api'
 import {PersonListPaginated, PersonDetails, PersonCombinedCredits} from '../models/Person'
 import formatImage from '../utils/formatImage'
 import sortByPopularity from '../utils/sortByPopularity'
+import { showCelebrity } from '../services/tmdb/celebrities'
 
 export default
 {
@@ -81,64 +82,9 @@ export default
 
 	show: async (req: Request, res: Response, next: NextFunction) =>
 	{
-		try
-		{
-			const {id} = req.params
+		const {id} = req.params
+		const celebrity = await showCelebrity(Number(id))
 
-			const {data: person}:{data: PersonDetails} = await api.get(`/person/${id}`)
-			const {data: credits}:{data: PersonCombinedCredits} = await api.get(`/person/${id}/combined_credits`)
-
-			return res.json(
-			{
-				id: person.id,
-				name: person.name,
-				image: formatImage(person.profile_path),
-				biography: person.biography,
-				knownForDepartment: person.known_for_department,
-				birthday: person.birthday,
-				placeOfBirth: person.place_of_birth,
-				credits:
-				{
-					cast: credits.cast.sort(sortByPopularity).map(media => (
-					{
-						id: media.id,
-						title: media.media_type === 'movie' ? media.title : media.name,
-						image: formatImage(media.poster_path),
-						character: media.character,
-						overview: media.overview,
-						date: media.media_type === 'movie' ? media.release_date : media.first_air_date,
-						type : media.media_type === 'movie' ? 'movie' : 'tvshow'
-					})),
-					crew: credits.crew.sort(sortByPopularity).map(media => (
-					{
-						id: media.id,
-						title: media.media_type === 'movie' ? media.title : media.name,
-						image: formatImage(media.poster_path),
-						overview: media.overview,
-						date: media.media_type === 'movie' ? media.release_date : media.first_air_date,
-						department: media.department,
-						type : media.media_type === 'movie' ? 'movie' : 'tvshow'
-					}))
-				}
-			})
-		}
-		catch (error)
-		{
-			return res.json(
-			{
-				id: 1,
-				name: 'Celebrity not found',
-				image: formatImage(undefined),
-				biography: '',
-				knownForDepartment: '',
-				birthday: '',
-				placeOfBirth: '',
-				credits:
-				{
-					cast: [],
-					crew: []
-				}
-			})
-		}
+		return res.json(celebrity)
 	}
 }
