@@ -50,6 +50,7 @@ routes.get('/users/:email/tvshows/:id', checkKey, userTvshows.show)
 
 routes.post('/events', checkKey, events.create)
 routes.put('/events/:id', checkKey, events.update)
+routes.delete('/events/:id', checkKey, events.remove)
 routes.get('/events', events.list)
 
 export default routes

@@ -42,6 +42,19 @@ const events =
 		return res.json(updated)
 	},
 
+	remove: async (req: Request, res: Response) =>
+	{
+		const {id} = req.params
+
+		const removed = await Event.findOne({id})
+		if (!removed)
+			return res.status(404).json({message: 'Event not found!'})
+
+		await Event.findByIdAndDelete(removed._id)
+
+		return res.json(removed)
+	},
+
 	list: async (req: Request, res: Response) =>
 	{
 		const rawEvents = await Event.find()
