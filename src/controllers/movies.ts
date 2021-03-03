@@ -1,9 +1,9 @@
 import {Request, Response, NextFunction} from 'express'
 
 import api from '../services/api'
-import {MovieSearchPaginated, MovieTrendingPaginated, MovieDetails, MovieCredits} from '../models/Movie'
+import {MovieSearchPaginated, MovieTrendingPaginated} from '../models/Movie'
 import formatImage from '../utils/formatImage'
-import sortByPopularity from '../utils/sortByPopularity'
+import {showMovie} from '../services/tmdb/movies'
 
 export default
 {
@@ -67,42 +67,8 @@ export default
 	{
 		const {id} = req.params
 
-		const {data: movie}:{data: MovieDetails} = await api.get(`/movie/${id}`)
-		const {data: credits}:{data: MovieCredits} = await api.get(`/movie/${id}/credits`)
+		const movie = await showMovie(Number(id))
 
-		res.json(
-		{
-			id: movie.id,
-			title: movie.title,
-			image: formatImage(movie.poster_path),
-			overview: movie.overview,
-			status: movie.status,
-			date: movie.release_date,
-			rating: movie.vote_average,
-			collection: movie.belongs_to_collection &&
-			{
-				id: movie.belongs_to_collection.id,
-				name: movie.belongs_to_collection.name,
-				image: formatImage(movie.belongs_to_collection.poster_path)
-			},
-			genres: movie.genres,
-			credits:
-			{
-				cast: credits.cast.sort(sortByPopularity).map(person => (
-				{
-					id: person.id,
-					name: person.name,
-					image: formatImage(person.profile_path),
-					character: person.character
-				})),
-				crew: credits.crew.sort(sortByPopularity).map(person => (
-				{
-					id: person.id,
-					name: person.name,
-					image: formatImage(person.profile_path),
-					department: person.department
-				}))
-			}
-		})
+		return res.json(movie)
 	}
 }
