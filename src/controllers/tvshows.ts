@@ -68,6 +68,6 @@ export default
 		const {id} = req.params
 		const tvshow = await showTvshow(Number(id))
 
-		return tvshow
+		return res.json(tvshow)
 	}
 }
