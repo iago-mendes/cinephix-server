@@ -13,7 +13,13 @@ export type EventType = mongoose.Document &
 		name: string
 		description: string
 		type: string // 'movies' | 'tvshows' | 'celebrities'
-		candidates: number[]
+		media: number[]
+		celebrities: Array<
+		{
+			celebrity: number
+			media: number
+			mediaType: string // 'movie' | 'tvshow'
+		}>
 	}>
 }
 
@@ -28,7 +34,13 @@ const EventSchema = new mongoose.Schema(
 		name: {type: String, required: true},
 		description: {type: String, required: true},
 		type: {type: String, required: true},
-		candidates: [{type: Number}]
+		media: [{type: Number}],
+		celebrities:
+		[{
+			celebrity: {type: Number, required: true},
+			media: {type: Number},
+			mediaType: {type: String}
+		}]
 	}]
 })
 EventSchema.index({name: 'text'})

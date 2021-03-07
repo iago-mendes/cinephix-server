@@ -1,6 +1,10 @@
 import {Request, Response} from 'express'
 
 import Event from '../models/Event'
+import { showCelebrity } from '../services/tmdb/celebrities'
+import { showMovie } from '../services/tmdb/movies'
+import { showTvshow } from '../services/tmdb/tvshows'
+import formatImage from '../utils/formatImage'
 
 interface Media
 {
@@ -99,27 +103,115 @@ const events =
 		interface Media
 		{
 			id: number
-			image: string
-			title: string
-			overview: string
-			date: string
+			image?: string
+			title?: string
+			overview?: string
+			date?: string
+			type: string
 		}
 		
 		interface Celebrity
 		{
-			id: number
-			image: string
-			name: string
+			celebrity:
+			{
+				id: number
+				image?: string
+				name?: string
+			},
 			media: Media
 		}
 
-		const categories:
+		let categories:
 		{
 			name: string
 			description: string
-			type: string 
-			candidates: Array<Media | Celebrity>
+			type: string
+			media: Media[]
+			celebrities: Celebrity[]
 		}[] = []
+
+		const promise = rawEvent.categories.map(async category =>
+		{
+			let media: Media[] = []
+			let celebrities: Celebrity[] = []
+
+			if (category.type === 'celebrities')
+			{
+				const promise2 = category.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
+				{
+					const celebrity = await showCelebrity(celebrityId)
+					const media: any = mediaType === 'movie'
+						? await showMovie(mediaId)
+						: await showTvshow(mediaId)
+					
+					celebrities.push(
+					{
+						celebrity:
+						{
+							id: celebrityId,
+							image: formatImage(celebrity.image),
+							name: celebrity.name,
+						},
+						media:
+						{
+							id: mediaId,
+							image: formatImage(media.image),
+							title: media.title,
+							overview: media.overview,
+							date: mediaType === 'movie' ? media.date : media.startDate,
+							type: mediaType
+						}
+					})
+				})
+				await Promise.all(promise2)
+			}
+			else if (category.type === 'movies')
+			{
+				const promise2 = category.media.map(async id =>
+				{
+					const movie = await showMovie(id)
+
+					media.push(
+					{
+						id,
+						image: formatImage(movie.image),
+						title: movie.title,
+						overview: movie.overview,
+						date: movie.date,
+						type: 'movie'
+					})
+				})
+				await Promise.all(promise2)
+			}
+			else if (category.type === 'tvshows')
+			{
+				const promise2 = category.media.map(async id =>
+				{
+					const tvshow = await showTvshow(id)
+					
+					media.push(
+					{
+						id,
+						image: formatImage(tvshow.image),
+						title: tvshow.title,
+						overview: tvshow.overview,
+						date: tvshow.startDate,
+						type: 'tvshow'
+					})
+				})
+				await Promise.all(promise2)
+			}
+
+			categories.push(
+			{
+				name: category.name,
+				description: category.description,
+				type: category.type,
+				media,
+				celebrities
+			})
+		})
+		await Promise.all(promise)
 
 		const event =
 		{
