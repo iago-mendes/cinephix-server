@@ -10,10 +10,11 @@ export type GroupType = mongoose.Document &
 	participants: Array<
 	{
 		email: string
+		isOwner: boolean
 		predictions: Array<
 		{
 			category: string
-			candidate: string
+			guess: number
 		}>
 	}>
 }
@@ -23,14 +24,15 @@ const GroupSchema = new mongoose.Schema(
 	nickname: {type: String, required: true},
 	banner: {type: String},
 	description: {type: String},
-	event: {type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true},
+	event: {type: String, ref: 'Event', required: true},
 	participants:
 	[{
 		email: {type: String, required: true},
+		isOwner: {type: Boolean, required: true},
 		predictions:
 		[{
 			category: {type: mongoose.Schema.Types.ObjectId, ref: 'Event.categories', required: true},
-			candidate: {type: mongoose.Schema.Types.ObjectId, ref: 'Event.categories.candidates', required: true},
+			guess: {type: Number, required: true},
 		}]
 	}]
 })

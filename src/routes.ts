@@ -9,6 +9,7 @@ import userMovies from './controllers/userMovies'
 import userTvshows from './controllers/userTvshows'
 import checkKey from './middlewares/checkKey'
 import events from './controllers/events'
+import groups from './controllers/groups'
 
 const routes = express.Router()
 
@@ -53,5 +54,7 @@ routes.put('/events/:id', checkKey, events.update)
 routes.delete('/events/:id', checkKey, events.remove)
 routes.get('/events', events.list)
 routes.get('/events/:id', events.show)
+
+routes.post('/groups', checkKey, groups.create)
 
 export default routes
