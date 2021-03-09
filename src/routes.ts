@@ -57,5 +57,6 @@ routes.get('/events/:id', events.show)
 
 routes.post('/groups', checkKey, groups.create)
 routes.put('/groups/:urlId', checkKey, groups.update)
+routes.get('/groups', checkKey, groups.list)
 
 export default routes

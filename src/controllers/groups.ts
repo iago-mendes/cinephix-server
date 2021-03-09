@@ -42,6 +42,13 @@ const groups =
 
 		await Group.findByIdAndUpdate(previous.id, group)
 		return res.json(group)
+	},
+
+	list: async (req: Request, res: Response) =>
+	{
+		const groups = await Group.find()
+
+		return res.json(groups)
 	}
 }
 
