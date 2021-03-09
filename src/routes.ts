@@ -10,6 +10,7 @@ import userTvshows from './controllers/userTvshows'
 import checkKey from './middlewares/checkKey'
 import events from './controllers/events'
 import groups from './controllers/groups'
+import groupParticipants from './controllers/groupParticipants'
 
 const routes = express.Router()
 
@@ -58,5 +59,8 @@ routes.get('/events/:id', events.show)
 routes.post('/groups', checkKey, groups.create)
 routes.put('/groups/:urlId', checkKey, groups.update)
 routes.get('/groups', checkKey, groups.list)
+
+routes.get('/groups/participants/:email', checkKey, groupParticipants.listGroups)
+routes.get('/groups/:urlId/participants', checkKey, groupParticipants.listParticipants)
 
 export default routes
