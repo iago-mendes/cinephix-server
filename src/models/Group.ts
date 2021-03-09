@@ -4,7 +4,7 @@ export type GroupType = mongoose.Document &
 {
 	_id: string
 	nickname: string
-	id: string
+	urlId: string
 	banner?: string
 	event: string
 	description?: string
@@ -23,7 +23,7 @@ export type GroupType = mongoose.Document &
 const GroupSchema = new mongoose.Schema(
 {
 	nickname: {type: String, required: true},
-	id: {type: String, required: true, unique: true},
+	urlId: {type: String, required: true, unique: true},
 	banner: {type: String},
 	description: {type: String},
 	event: {type: String, ref: 'Event', required: true},
