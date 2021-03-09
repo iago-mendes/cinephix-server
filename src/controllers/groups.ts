@@ -40,7 +40,7 @@ const groups =
 			participants: participants || previous.participants,
 		}
 
-		await Group.findByIdAndUpdate(previous.id, group)
+		await Group.findByIdAndUpdate(previous._id, group)
 		return res.json(group)
 	},
 
