@@ -21,7 +21,7 @@ const groupParticipants =
 		return res.json(groups)
 	},
 
-	listParticipants: async (req: Request, res: Response) =>
+	list: async (req: Request, res: Response) =>
 	{
 		const {urlId} = req.params
 
@@ -32,7 +32,7 @@ const groupParticipants =
 		return res.json(group.participants)
 	},
 
-	addParticipant: async (req: Request, res: Response) =>
+	add: async (req: Request, res: Response) =>
 	{
 		const {urlId} = req.params
 		const {email} = req.body
@@ -54,6 +54,27 @@ const groupParticipants =
 			isOwner: false,
 			predictions: []
 		})
+
+		await Group.findByIdAndUpdate(group._id, {participants})
+		return res.send()
+	},
+
+	remove: async (req: Request, res: Response) =>
+	{
+		const {urlId, email} = req.params
+
+		if (!email)
+			return res.status(400).json({message: 'You need to provide an email!'})
+
+		const group = await Group.findOne({urlId})
+		if (!group)
+			return res.status(404).json({message: 'Group not found!'})
+		
+		let participants = group.participants
+		if (!isParticipantInGroup(String(email), participants))
+			return res.status(400).json({message: `User with email ${email} is not in the group ${group.nickname}!`})
+		
+		participants = participants.filter(participant => participant.email !== String(email))
 
 		await Group.findByIdAndUpdate(group._id, {participants})
 		return res.send()

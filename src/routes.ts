@@ -60,7 +60,9 @@ routes.post('/groups', checkKey, groups.create)
 routes.get('/groups', checkKey, groups.list)
 routes.get('/groups/participants/:email', checkKey, groupParticipants.listGroups)
 routes.put('/groups/:urlId', checkKey, groups.update)
-routes.post('/groups/:urlId/participants', checkKey, groupParticipants.addParticipant)
-routes.get('/groups/:urlId/participants', checkKey, groupParticipants.listParticipants)
+
+routes.post('/groups/:urlId/participants', checkKey, groupParticipants.add)
+routes.get('/groups/:urlId/participants', checkKey, groupParticipants.list)
+routes.delete('/groups/:urlId/participants/:email', checkKey, groupParticipants.remove)
 
 export default routes
