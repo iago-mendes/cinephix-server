@@ -1,6 +1,7 @@
 import {Request, Response} from 'express'
 
 import Group from '../../models/Group'
+import Event from '../../models/Event'
 import isParticipantInGroup from '../../utils/isParticipantInGroup'
 
 const groupParticipants =
@@ -9,14 +10,46 @@ const groupParticipants =
 	{
 		const {email} = req.params
 
-		const groupsAll = await Group.find()
-		let groups: any[] = []
+		const rawGroups = await Group.find()
 
-		groupsAll.map(group =>
+		let groups: Array<
 		{
-			if (isParticipantInGroup(String(email), group.participants))
-				groups.push(group)
+			nickname: string
+			urlId: string
+			banner?: string
+			event:
+			{
+				id: string
+				name: string
+				color: string
+				description: string
+			}
+			description?: string
+		}> = []
+
+		const promise = rawGroups.map(async group =>
+		{
+			if (!isParticipantInGroup(String(email), group.participants))
+				return
+
+			const event = await Event.findOne({id: group.event})
+
+			groups.push(
+			{
+				nickname: group.nickname,
+				urlId: group.urlId,
+				banner: group.banner,
+				event:
+				{
+					id: event ? event.id : '',
+					name: event ? event.name : '',
+					color: event ? event.color : '',
+					description: event ? event.description : ''
+				},
+				description: group.description
+			})
 		})
+		await Promise.all(promise)
 
 		return res.json(groups)
 	},
