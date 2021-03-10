@@ -6,6 +6,7 @@ import api from '../services/api'
 import formatImage from '../utils/formatImage'
 import sortByPopularity from '../utils/sortByPopularity'
 import validVenues from '../../db/venues.json'
+import validStatus from '../../db/status.json'
 
 interface Ratings
 {
@@ -25,11 +26,6 @@ interface ListedTvshow
 	venue: string | undefined
 	ratings: Ratings
 }
-
-const validStatus =
-[
-	'watchList',	'watching',	'waiting',	'completed',	'stopped',	'paused'
-]
 
 export default
 {
