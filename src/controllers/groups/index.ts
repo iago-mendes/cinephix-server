@@ -1,6 +1,6 @@
 import {Request, Response} from 'express'
 
-import Group from '../models/Group'
+import Group from '../../models/Group'
 
 const groups =
 {
@@ -49,6 +49,17 @@ const groups =
 		const groups = await Group.find()
 
 		return res.json(groups)
+	},
+
+	listParticipants: async (req: Request, res: Response) =>
+	{
+		const {urlId} = req.params
+
+		const group = await Group.findOne({urlId})
+		if (!group)
+			return res.status(404).json({message: 'Group not found!'})
+
+		return res.json(group.participants)
 	}
 }
 
