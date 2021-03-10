@@ -98,6 +98,29 @@ const groupParticipants =
 		return res.json(participant)
 	},
 
+	update: async (req: Request, res: Response) =>
+	{
+		const {urlId, email} = req.params
+		const {predictions} = req.body
+
+		if (!email)
+			return res.status(400).json({message: 'You need to provide an email!'})
+
+		const group = await Group.findOne({urlId})
+		if (!group)
+			return res.status(404).json({message: 'Group not found!'})
+
+		let participants = group.participants
+		const index = participants.findIndex(participant => participant.email === String(email))
+		if (index < 0)
+			return res.status(404).json({message: 'Participant not found!'})
+
+		participants[index].predictions = predictions
+		await Group.findByIdAndUpdate(group._id, {participants})
+
+		return res.send()
+	},
+
 	changeOwnership: async (req: Request, res: Response) =>
 	{
 		const {urlId, email} = req.params

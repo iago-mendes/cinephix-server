@@ -123,6 +123,7 @@ const events =
 
 		let categories:
 		{
+			id: string
 			name: string
 			description: string
 			type: string
@@ -204,6 +205,7 @@ const events =
 
 			categories.push(
 			{
+				id: String(category._id),
 				name: category.name,
 				description: category.description,
 				type: category.type,
