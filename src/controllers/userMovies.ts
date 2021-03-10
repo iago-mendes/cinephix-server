@@ -5,6 +5,7 @@ import api from '../services/api'
 import formatImage from '../utils/formatImage'
 import sortByPopularity from '../utils/sortByPopularity'
 import {MovieCredits, MovieDetails} from '../models/Movie'
+import validVenues from '../../db/venues.json'
 
 interface Ratings
 {
@@ -14,11 +15,6 @@ interface Ratings
 	cinematography?: number
 	musicAndSound?: number
 }
-
-const validVenues =
-[
-	'Netflix', 'Prime Video', 'Disney+', 'HBO Max', 'Movie Theater', 'Other'
-]
 
 export default
 {

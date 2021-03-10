@@ -5,6 +5,7 @@ import User from '../models/User'
 import api from '../services/api'
 import formatImage from '../utils/formatImage'
 import sortByPopularity from '../utils/sortByPopularity'
+import validVenues from '../../db/venues.json'
 
 interface Ratings
 {
@@ -28,10 +29,6 @@ interface ListedTvshow
 const validStatus =
 [
 	'watchList',	'watching',	'waiting',	'completed',	'stopped',	'paused'
-]
-const validVenues =
-[
-	'Netflix', 'Prime Video', 'Disney+', 'HBO Max', 'Movie Theater', 'Other'
 ]
 
 export default
