@@ -4,7 +4,7 @@ import Group from '../../models/Group'
 import Event from '../../models/Event'
 import isParticipantInGroup from '../../utils/isParticipantInGroup'
 import User from '../../models/User'
-import formatImage from '../../utils/formatImage'
+import formatImage, {formatUserImage} from '../../utils/formatImage'
 import {Media, Celebrity} from '../../utils/interfaces'
 import {showCelebrity} from '../../services/tmdb/celebrities'
 import {showMovie} from '../../services/tmdb/movies'
@@ -84,7 +84,7 @@ const groupParticipants =
 			{
 				email: participant.email,
 				isOwner: participant.isOwner,
-				image: user ? user.image : formatImage(undefined),
+				image: user ? formatUserImage(user.image) : formatUserImage(undefined),
 				name: user ? user.name : 'Not registered user'
 			})
 		})
