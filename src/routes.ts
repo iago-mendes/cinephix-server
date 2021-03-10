@@ -58,8 +58,10 @@ routes.get('/events/:id', events.show)
 
 routes.post('/groups', checkKey, groups.create)
 routes.get('/groups', checkKey, groups.list)
+routes.get('/groups/raw', checkKey, groups.raw)
 routes.get('/groups/participants/:email', checkKey, groupParticipants.listGroups)
 routes.put('/groups/:urlId', checkKey, groups.update)
+routes.get('/groups/:urlId/raw', checkKey, groups.rawOne)
 
 routes.post('/groups/:urlId/participants', checkKey, groupParticipants.add)
 routes.get('/groups/:urlId/participants', checkKey, groupParticipants.list)

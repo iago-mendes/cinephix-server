@@ -86,6 +86,20 @@ const groups =
 		await Promise.all(promise)
 
 		return res.json(groups)
+	},
+
+	raw: async (req: Request, res: Response) =>
+	{
+		const groups = await Group.find()
+		return res.json(groups)
+	},
+
+	rawOne: async (req: Request, res: Response) =>
+	{
+		const {urlId} = req.params
+		const group = await Group.findOne({urlId})
+		
+		return res.json(group)
 	}
 }
 
