@@ -64,5 +64,6 @@ routes.put('/groups/:urlId', checkKey, groups.update)
 routes.post('/groups/:urlId/participants', checkKey, groupParticipants.add)
 routes.get('/groups/:urlId/participants', checkKey, groupParticipants.list)
 routes.delete('/groups/:urlId/participants/:email', checkKey, groupParticipants.remove)
+routes.put('/groups/:urlId/participants/:email', checkKey, groupParticipants.changeOwnership)
 
 export default routes
