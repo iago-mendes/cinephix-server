@@ -5,6 +5,10 @@ import Event from '../../models/Event'
 import isParticipantInGroup from '../../utils/isParticipantInGroup'
 import User from '../../models/User'
 import formatImage from '../../utils/formatImage'
+import {Media, Celebrity} from '../../utils/interfaces'
+import {showCelebrity} from '../../services/tmdb/celebrities'
+import {showMovie} from '../../services/tmdb/movies'
+import {showTvshow} from '../../services/tmdb/tvshows'
 
 const groupParticipants =
 {
@@ -148,9 +152,126 @@ const groupParticipants =
 		if (!group)
 			return res.status(404).json({message: 'Group not found!'})
 
-		const participant = group.participants.find(participant => participant.email === String(email))
-		if (!participant)
+		const event = await Event.findOne({id: group.event})
+		if (!event)
+			return res.status(404).json({message: 'Event not found!'})
+
+		const rawParticipant = group.participants.find(participant => participant.email === String(email))
+		if (!rawParticipant)
 			return res.status(404).json({message: 'Participant not found!'})
+		
+		let predictions: Array<
+		{
+			guess: number
+			category:
+			{
+				id: string
+				name: string
+				description: string
+				type: string
+				media: Media[]
+				celebrities: Celebrity[]
+			}
+		}> = []
+
+		const promise = rawParticipant.predictions.map(async ({category: categoryId, guess}) =>
+		{
+			const category = event.categories.find(({_id}) => String(_id) == String(categoryId))
+			if (!category)
+				return
+
+			let media: Media[] = []
+			let celebrities: Celebrity[] = []
+
+			if (category.type === 'celebrities')
+			{
+				const promise2 = category.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
+				{
+					const celebrity = await showCelebrity(celebrityId)
+					const media: any = mediaType === 'movie'
+						? await showMovie(mediaId)
+						: await showTvshow(mediaId)
+					
+					celebrities.push(
+					{
+						celebrity:
+						{
+							id: celebrityId,
+							image: formatImage(celebrity.image),
+							name: celebrity.name,
+						},
+						media:
+						{
+							id: mediaId,
+							image: formatImage(media.image),
+							title: media.title,
+							overview: media.overview,
+							date: mediaType === 'movie' ? media.date : media.startDate,
+							type: mediaType
+						}
+					})
+				})
+				await Promise.all(promise2)
+			}
+			else if (category.type === 'movies')
+			{
+				const promise2 = category.media.map(async id =>
+				{
+					const movie = await showMovie(id)
+
+					media.push(
+					{
+						id,
+						image: formatImage(movie.image),
+						title: movie.title,
+						overview: movie.overview,
+						date: movie.date,
+						type: 'movie'
+					})
+				})
+				await Promise.all(promise2)
+			}
+			else if (category.type === 'tvshows')
+			{
+				const promise2 = category.media.map(async id =>
+				{
+					const tvshow = await showTvshow(id)
+					
+					media.push(
+					{
+						id,
+						image: formatImage(tvshow.image),
+						title: tvshow.title,
+						overview: tvshow.overview,
+						date: tvshow.startDate,
+						type: 'tvshow'
+					})
+				})
+				await Promise.all(promise2)
+			}
+
+			predictions.push(
+			{
+				guess,
+				category:
+				{
+					id: String(category._id),
+					name: category.name,
+					description: category.description,
+					type: category.type,
+					media,
+					celebrities
+				}
+			})
+		})
+		await Promise.all(promise)
+
+		const participant =
+		{
+			email: rawParticipant.email,
+			isOwner: rawParticipant.isOwner,
+			predictions
+		}
 
 		return res.json(participant)
 	},

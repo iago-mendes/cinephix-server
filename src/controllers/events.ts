@@ -1,28 +1,11 @@
 import {Request, Response} from 'express'
 
 import Event from '../models/Event'
-import { showCelebrity } from '../services/tmdb/celebrities'
-import { showMovie } from '../services/tmdb/movies'
-import { showTvshow } from '../services/tmdb/tvshows'
+import {showCelebrity} from '../services/tmdb/celebrities'
+import {showMovie} from '../services/tmdb/movies'
+import {showTvshow} from '../services/tmdb/tvshows'
 import formatImage from '../utils/formatImage'
-
-interface Media
-{
-	id: number
-	image: string
-	title: string
-	overview: string
-	date: string
-	type?: string
-}
-
-interface Celebrity
-{
-	id: number
-	image: string
-	name: string
-	media: Media
-}
+import {Media, Celebrity} from '../utils/interfaces'
 
 const events =
 {
@@ -99,27 +82,6 @@ const events =
 		const rawEvent = await Event.findOne({id})
 		if (!rawEvent)
 			return res.status(404).json({message: 'Event not found!'})
-
-		interface Media
-		{
-			id: number
-			image?: string
-			title?: string
-			overview?: string
-			date?: string
-			type: string
-		}
-		
-		interface Celebrity
-		{
-			celebrity:
-			{
-				id: number
-				image?: string
-				name?: string
-			},
-			media: Media
-		}
 
 		let categories:
 		{
