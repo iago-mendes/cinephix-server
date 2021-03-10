@@ -3,6 +3,8 @@ import {Request, Response} from 'express'
 import Group from '../../models/Group'
 import Event from '../../models/Event'
 import isParticipantInGroup from '../../utils/isParticipantInGroup'
+import User from '../../models/User'
+import formatImage from '../../utils/formatImage'
 
 const groupParticipants =
 {
@@ -61,8 +63,30 @@ const groupParticipants =
 		const group = await Group.findOne({urlId})
 		if (!group)
 			return res.status(404).json({message: 'Group not found!'})
+		
+		let participants: Array<
+		{
+			email: string
+			isOwner: boolean
+			image?: string
+			name?: string
+		}> = []
 
-		return res.json(group.participants)
+		const promise = group.participants.map(async participant =>
+		{
+			const user = await User.findOne({email: participant.email})
+
+			participants.push(
+			{
+				email: participant.email,
+				isOwner: participant.isOwner,
+				image: user ? user.image : formatImage(undefined),
+				name: user ? user.name : 'Not registered user'
+			})
+		})
+		await Promise.all(promise)
+
+		return res.json(participants)
 	},
 
 	add: async (req: Request, res: Response) =>
