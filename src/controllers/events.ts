@@ -112,13 +112,13 @@ const events =
 						celebrity:
 						{
 							id: celebrityId,
-							image: formatImage(celebrity.image),
+							image: celebrity.image,
 							name: celebrity.name,
 						},
 						media:
 						{
 							id: mediaId,
-							image: formatImage(media.image),
+							image: media.image,
 							title: media.title,
 							overview: media.overview,
 							date: mediaType === 'movie' ? media.date : media.startDate,
@@ -137,7 +137,7 @@ const events =
 					media.push(
 					{
 						id,
-						image: formatImage(movie.image),
+						image: movie.image,
 						title: movie.title,
 						overview: movie.overview,
 						date: movie.date,
@@ -155,7 +155,7 @@ const events =
 					media.push(
 					{
 						id,
-						image: formatImage(tvshow.image),
+						image: tvshow.image,
 						title: tvshow.title,
 						overview: tvshow.overview,
 						date: tvshow.startDate,
