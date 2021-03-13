@@ -30,7 +30,7 @@ mongoose.connection
 .on('error', error => console.log('[database connection error]:', error))
 
 app.use(routes)
-app.use('/assets', express.static(path.join(__dirname, '..', 'assets')))
+app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')))
 
 app.use(errorHandler)
 
