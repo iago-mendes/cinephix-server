@@ -4,7 +4,6 @@ import Event from '../models/Event'
 import {showCelebrity} from '../services/tmdb/celebrities'
 import {showMovie} from '../services/tmdb/movies'
 import {showTvshow} from '../services/tmdb/tvshows'
-import formatImage from '../utils/formatImage'
 import {Media, Celebrity} from '../utils/interfaces'
 
 const events =
@@ -194,7 +193,24 @@ const events =
 		}
 
 		return res.json(event)
-	}
+	},
+
+	raw: async (req: Request, res: Response) =>
+	{
+		const events = await Event.find()
+		return res.json(events)
+	},
+
+	rawOne: async (req: Request, res: Response) =>
+	{
+		const {id} = req.params
+
+		const event = await Event.findOne({id})
+		if (!event)
+			return res.status(404).json({message: 'Event not found!'})
+
+		return res.json(event)
+	},
 }
 
 export default events
