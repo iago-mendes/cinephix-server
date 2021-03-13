@@ -11,7 +11,7 @@ const events =
 {
 	create: async (req: Request, res: Response) =>
 	{
-		const {id, name, color, description, categories} = req.body
+		const {id, name, color, description, status, categories} = req.body
 
 		const event =
 		{
@@ -19,6 +19,7 @@ const events =
 			name,
 			color,
 			description,
+			status,
 			categories
 		}
 
@@ -29,7 +30,7 @@ const events =
 	update: async (req: Request, res: Response) =>
 	{
 		const {id} = req.params
-		const {name, color, description, categories} = req.body
+		const {name, color, description, status, categories} = req.body
 
 		const previous = await Event.findOne({id})
 		if (!previous)
@@ -40,6 +41,7 @@ const events =
 			name: name ? name : previous.name,
 			color: color ? color : previous.color,
 			description: description ? description : previous.description,
+			status: status ? status : previous.status,
 			categories: categories ? categories : previous.categories
 		}
 
@@ -63,8 +65,9 @@ const events =
 	list: async (req: Request, res: Response) =>
 	{
 		const rawEvents = await Event.find()
+		const openEvents = rawEvents.filter(event => event.status.isOpen)
 
-		const events = rawEvents.map(event => (
+		const events = openEvents.map(event => (
 		{
 			id: event.id,
 			name: event.name,
@@ -82,6 +85,10 @@ const events =
 		const rawEvent = await Event.findOne({id})
 		if (!rawEvent)
 			return res.status(404).json({message: 'Event not found!'})
+		
+		if (!rawEvent.status.isOpen)
+			return res.status(401).json({message: `The event ${rawEvent.name} is not open!`})
+
 
 		let categories:
 		{
