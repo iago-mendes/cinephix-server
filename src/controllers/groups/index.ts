@@ -2,6 +2,10 @@ import {Request, Response} from 'express'
 
 import Group from '../../models/Group'
 import Event from '../../models/Event'
+import {Media, Celebrity} from '../../utils/interfaces'
+import { showCelebrity } from '../../services/tmdb/celebrities'
+import { showMovie } from '../../services/tmdb/movies'
+import { showTvshow } from '../../services/tmdb/tvshows'
 
 const groups =
 {
@@ -86,6 +90,173 @@ const groups =
 		await Promise.all(promise)
 
 		return res.json(groups)
+	},
+
+	show: async (req: Request, res: Response) =>
+	{
+		const {urlId} = req.params
+
+		const rawGroup = await Group.findOne({urlId})
+		if (!rawGroup)
+			return res.status(404).json({message: 'Group not found!'})
+		
+		const rawEvent = await Event.findOne({id: rawGroup.event})
+		if (!rawEvent)
+			return res.status(404).json({message: 'Event not found!'})
+
+		interface Prediction
+		{
+			category:
+			{
+				id: string,
+				name: string,
+				description: string,
+				type: string
+			},
+			guess: Media | Celebrity
+		}
+		let participants: Array<
+		{
+			email: string,
+			isOwner: boolean,
+			predictions: Prediction[]
+		}> = []
+
+		let participantGuesses: Array<
+		{
+			category: string
+			guess: number
+			participants: Array<
+			{
+				image: string
+				name: string
+				email: string
+			}>
+		}> = []
+
+		const promise = rawGroup.participants.map(async participant =>
+		{
+			let tmpPredictions: Prediction[] = []
+
+			const promise2 = participant.predictions.map(async prediction =>
+			{
+				const rawCategory = rawEvent.categories.find(({_id}) => String(_id) == String(prediction.category))
+				if (!rawCategory)
+					return
+				
+				const category =
+				{
+					id: String(rawCategory._id),
+					name: rawCategory.name,
+					description: rawCategory.description,
+					type: rawCategory.type
+				}
+
+				if (category.type === 'celebrities')
+				{
+					const celebrity = await showCelebrity(prediction.guess)
+					const ids = rawCategory.celebrities.find(({celebrity: id}) => String(id) == String(celebrity.id))
+					if (!ids)
+						return
+					
+					const media: any = ids.mediaType === 'movie'
+						? await showMovie(ids.media)
+						: await showTvshow(ids.media)
+
+					const tmpGuess: Celebrity =
+					{
+						celebrity:
+						{
+							id: ids.celebrity,
+							image: celebrity.image,
+							name: celebrity.name,
+						},
+						media:
+						{
+							id: ids.media,
+							image: media.image,
+							title: media.title,
+							overview: media.overview,
+							date: ids.mediaType === 'movie' ? media.date : media.startDate,
+							type: ids.mediaType
+						}
+					}
+
+					tmpPredictions.push(
+					{
+						category,
+						guess: tmpGuess
+					})
+				}
+				else if (category.type === 'movies')
+				{
+					const movie = await showMovie(prediction.guess)
+					if (!movie)
+						return
+					
+					const tmpGuess: Media =
+					{
+						id: prediction.guess,
+						image: movie.image,
+						title: movie.title,
+						overview: movie.overview,
+						date: movie.date,
+						type: 'movie'
+					}
+
+					tmpPredictions.push(
+					{
+						category,
+						guess: tmpGuess
+					})
+				}
+				else if (category.type === 'tvshows')
+				{
+					const tvshow = await showTvshow(prediction.guess)
+					if (!tvshow)
+						return
+
+					const tmpGuess: Media =
+					{
+						id: prediction.guess,
+						image: tvshow.image,
+						title: tvshow.title,
+						overview: tvshow.overview,
+						date: tvshow.startDate,
+						type: 'tvshow'
+					}
+				}
+			})
+			await Promise.all(promise2)
+
+			participants.push(
+			{
+				email: participant.email,
+				isOwner: participant.isOwner,
+				predictions: tmpPredictions
+			})
+		})
+		await Promise.all(promise)
+		
+		const event =
+		{
+			id: rawEvent.id,
+			name: rawEvent.name,
+			color: rawEvent.color,
+			description: rawEvent.description,
+		}
+		
+		const group =
+		{
+			urlId: rawGroup.urlId,
+			banner: rawGroup.banner,
+			nickname: rawGroup.nickname,
+			description: rawGroup.description,
+			participants,
+			event
+		}
+
+		return res.json(group)
 	},
 
 	raw: async (req: Request, res: Response) =>
