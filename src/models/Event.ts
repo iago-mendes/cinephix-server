@@ -7,6 +7,11 @@ export type EventType = mongoose.Document &
 	name: string
 	color: string
 	description: string
+	status:
+	{
+		isOpen: boolean
+		hasResults: boolean
+	}
 	categories: Array<
 	{
 		_id?: string
@@ -29,6 +34,11 @@ const EventSchema = new mongoose.Schema(
 	name: {type: String, required: true},
 	color: {type: String, required: true},
 	description: {type: String, required: true},
+	status:
+	{
+		isOpen: {type: Boolean, required: true},
+		hasResults: {type: Boolean, required: true}
+	},
 	categories:
 	[{
 		name: {type: String, required: true},
