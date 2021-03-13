@@ -3,9 +3,11 @@ import {Request, Response} from 'express'
 import Group from '../../models/Group'
 import Event from '../../models/Event'
 import {Media, Celebrity} from '../../utils/interfaces'
-import { showCelebrity } from '../../services/tmdb/celebrities'
-import { showMovie } from '../../services/tmdb/movies'
-import { showTvshow } from '../../services/tmdb/tvshows'
+import {showCelebrity} from '../../services/tmdb/celebrities'
+import {showMovie} from '../../services/tmdb/movies'
+import {showTvshow} from '../../services/tmdb/tvshows'
+import User from '../../models/User'
+import {formatUserImage} from '../../utils/formatImage'
 
 const groups =
 {
@@ -122,21 +124,32 @@ const groups =
 			predictions: Prediction[]
 		}> = []
 
-		let participantGuesses: Array<
+		interface ParticipantGuesses
 		{
-			category: string
-			guess: number
 			participants: Array<
 			{
 				image: string
 				name: string
 				email: string
 			}>
+		}
+		let participantGuesses: Array<ParticipantGuesses &
+		{
+			category: string
+			guess: number
 		}> = []
 
 		const promise = rawGroup.participants.map(async participant =>
 		{
 			let tmpPredictions: Prediction[] = []
+
+			const rawUser = await User.findOne({email: participant.email})
+			const user =
+			{
+				email: participant.email,
+				image: rawUser ? formatUserImage(rawUser.image) : formatUserImage(undefined),
+				name: rawUser ? String(rawUser.name) : 'Not registered user'
+			}
 
 			const promise2 = participant.predictions.map(async prediction =>
 			{
@@ -226,6 +239,18 @@ const groups =
 						type: 'tvshow'
 					}
 				}
+
+				const existingIndex = participantGuesses
+					.findIndex(({category, guess}) => category == prediction.category && guess == prediction.guess)
+				if (existingIndex < 0)
+					participantGuesses.push(
+					{
+						category: prediction.category,
+						guess: prediction.guess,
+						participants: [user]
+					})
+				else
+					participantGuesses[existingIndex].participants.push(user)
 			})
 			await Promise.all(promise2)
 
@@ -237,6 +262,120 @@ const groups =
 			})
 		})
 		await Promise.all(promise)
+
+		let categories: Array<
+		{
+			id: string,
+			name: string,
+			description: string,
+			type: string,
+			media: Array<Media & ParticipantGuesses>,
+			celebrities: Array<Celebrity & ParticipantGuesses>
+		}> = []
+
+		const promise2 = rawEvent.categories.map(async rawCategory =>
+		{
+			const category =
+			{
+				id: String(rawCategory._id),
+				name: rawCategory.name,
+				description: rawCategory.description,
+				type: rawCategory.type
+			}
+
+			let media: Array<Media & ParticipantGuesses> = []
+			let celebrities: Array<Celebrity & ParticipantGuesses> = []
+
+			if (category.type === 'celebrities')
+			{
+				const promise3 = rawCategory.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
+				{
+					const celebrity = await showCelebrity(celebrityId)
+					const media: any = mediaType === 'movie'
+						? await showMovie(mediaId)
+						: await showTvshow(mediaId)
+					
+					const participantGuess = participantGuesses
+						.find(({category: id, guess}) => id == category.id && guess == celebrityId)
+					
+					celebrities.push(
+					{
+						celebrity:
+						{
+							id: celebrityId,
+							image: celebrity.image,
+							name: celebrity.name,
+						},
+						media:
+						{
+							id: mediaId,
+							image: media.image,
+							title: media.title,
+							overview: media.overview,
+							date: mediaType === 'movie' ? media.date : media.startDate,
+							type: mediaType
+						},
+						participants: participantGuess ? participantGuess.participants : []
+					})
+				})
+				await Promise.all(promise3)
+			}
+			else if (category.type === 'movies')
+			{
+				const promise3 = rawCategory.media.map(async id =>
+				{
+					const movie = await showMovie(id)
+
+					const participantGuess = participantGuesses
+						.find(({category: categoryId, guess}) => categoryId == category.id && guess == id)
+					
+					media.push(
+					{
+						id,
+						image: movie.image,
+						title: movie.title,
+						overview: movie.overview,
+						date: movie.date,
+						type: 'movie',
+						participants: participantGuess ? participantGuess.participants : []
+					})
+				})
+				await Promise.all(promise3)
+			}
+			else if (category.type === 'tvshows')
+			{
+				const promise3 = rawCategory.media.map(async id =>
+				{
+					const tvshow = await showTvshow(id)
+
+					const participantGuess = participantGuesses
+						.find(({category: categoryId, guess}) => categoryId == category.id && guess == id)
+					
+					media.push(
+					{
+						id,
+						image: tvshow.image,
+						title: tvshow.title,
+						overview: tvshow.overview,
+						date: tvshow.startDate,
+						type: 'tvshow',
+						participants: participantGuess ? participantGuess.participants : []
+					})
+				})
+				await Promise.all(promise3)
+			}
+
+			categories.push(
+			{
+				id: String(rawCategory._id),
+				name: rawCategory.name,
+				description: rawCategory.description,
+				type: rawCategory.type,
+				media,
+				celebrities
+			})
+		})
+		await Promise.all(promise2)
 		
 		const event =
 		{
@@ -244,6 +383,7 @@ const groups =
 			name: rawEvent.name,
 			color: rawEvent.color,
 			description: rawEvent.description,
+			categories
 		}
 		
 		const group =
