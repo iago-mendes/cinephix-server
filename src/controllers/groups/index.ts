@@ -119,6 +119,8 @@ const groups =
 		}
 		let participants: Array<
 		{
+			image: string,
+			name: string,
 			email: string,
 			isOwner: boolean,
 			predictions: Prediction[]
@@ -256,7 +258,7 @@ const groups =
 
 			participants.push(
 			{
-				email: participant.email,
+				...user,
 				isOwner: participant.isOwner,
 				predictions: tmpPredictions
 			})
