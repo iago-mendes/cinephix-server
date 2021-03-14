@@ -1,6 +1,6 @@
 import {Request, Response} from 'express'
 
-import Group from '../../models/Group'
+import Group, {GroupType} from '../../models/Group'
 import Event from '../../models/Event'
 import {Media, Celebrity} from '../../utils/interfaces'
 import {showCelebrity} from '../../services/tmdb/celebrities'
@@ -9,11 +9,20 @@ import {showTvshow} from '../../services/tmdb/tvshows'
 import User from '../../models/User'
 import {formatUserImage} from '../../utils/formatImage'
 
+const invalidIds = ['raw', 'participants', 'create']
+
 const groups =
 {
 	create: async (req: Request, res: Response) =>
 	{
-		const {nickname, urlId, banner, event, description, participants} = req.body
+		const {nickname, urlId, banner, event, description, participants}: GroupType = req.body
+
+		if (!nickname || !urlId || !event || !participants)
+			return res.status(400).json({message: 'You have not provided enough information!'})
+		
+		const existing = await Group.findOne({urlId})
+		if (existing || invalidIds.includes(urlId))
+			return res.status(400).json({message: 'Invalid group ID!'})
 
 		const group =
 		{
@@ -26,7 +35,7 @@ const groups =
 		}
 
 		await Group.create(group)
-		return res.json(group)
+		return res.status(201).send()
 	},
 
 	update: async (req: Request, res: Response) =>
@@ -48,6 +57,18 @@ const groups =
 
 		await Group.findByIdAndUpdate(previous._id, group)
 		return res.json(group)
+	},
+
+	remove: async (req: Request, res: Response) =>
+	{
+		const {urlId} = req.params
+
+		const removed = await Group.findOne({urlId})
+		if (!removed)
+			return res.status(404).json({message: 'Group not found!'})
+
+		await Group.findByIdAndRemove(removed._id)
+		return res.send()
 	},
 
 	list: async (req: Request, res: Response) =>

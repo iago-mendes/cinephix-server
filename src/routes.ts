@@ -63,6 +63,7 @@ routes.get('/groups', checkKey, groups.list)
 routes.get('/groups/raw', checkKey, groups.raw)
 routes.get('/groups/participants/:email', checkKey, groupParticipants.listGroups)
 routes.put('/groups/:urlId', checkKey, groups.update)
+routes.delete('/groups/:urlId', checkKey, groups.remove)
 routes.get('/groups/:urlId', checkKey, groups.show)
 routes.get('/groups/:urlId/raw', checkKey, groups.rawOne)
 
