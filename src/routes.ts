@@ -68,8 +68,10 @@ routes.get('/groups/:urlId/raw', checkKey, groups.rawOne)
 
 routes.post('/groups/:urlId/participants', checkKey, groupParticipants.add)
 routes.get('/groups/:urlId/participants', checkKey, groupParticipants.list)
+routes.get('/groups/:urlId/participants/raw', checkKey, groupParticipants.raw)
 routes.delete('/groups/:urlId/participants/:email', checkKey, groupParticipants.remove)
 routes.get('/groups/:urlId/participants/:email', checkKey, groupParticipants.show)
+routes.get('/groups/:urlId/participants/:email/raw', checkKey, groupParticipants.rawOne)
 routes.put('/groups/:urlId/participants/:email', checkKey, groupParticipants.update)
 routes.put('/groups/:urlId/participants/:email/ownership', checkKey, groupParticipants.changeOwnership)
 

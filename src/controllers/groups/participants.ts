@@ -329,6 +329,37 @@ const groupParticipants =
 
 		await Group.findByIdAndUpdate(group._id, {participants})
 		return res.send()
+	},
+
+	raw: async (req: Request, res: Response) =>
+	{
+		const {urlId} = req.params
+
+		const group = await Group.findOne({urlId})
+		if (!group)
+			return res.status(404).json({message: 'Group not found!'})
+		
+		const participants = group.participants
+
+		return res.json(participants)
+	},
+
+	rawOne: async (req: Request, res: Response) =>
+	{
+		const {urlId, email} = req.params
+
+		if (!email)
+			return res.status(400).json({message: 'You need to provide an email!'})
+
+		const group = await Group.findOne({urlId})
+		if (!group)
+			return res.status(404).json({message: 'Group not found!'})
+
+		const participant = group.participants.find(participant => participant.email === String(email))
+		if (!participant)
+			return res.status(404).json({message: 'Participant not found!'})
+		
+		return res.json(participant)
 	}
 }
 
