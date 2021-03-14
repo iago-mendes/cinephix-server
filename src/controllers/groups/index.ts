@@ -32,7 +32,7 @@ const groups =
 	update: async (req: Request, res: Response) =>
 	{
 		const {urlId} = req.params
-		const {nickname, banner, event, description, participants} = req.body
+		const {nickname, banner, event, description} = req.body
 
 		const previous = await Group.findOne({urlId})
 		if (!previous)
@@ -40,11 +40,10 @@ const groups =
 
 		const group =
 		{
-			nickname: nickname || previous.nickname,
-			banner: banner || previous.banner,
-			event: event || previous.event,
-			description: description || previous.description,
-			participants: participants || previous.participants,
+			nickname: nickname ? nickname : previous.nickname,
+			banner: banner ? banner : previous.banner,
+			event: event ? event : previous.event,
+			description: description ? description : previous.description
 		}
 
 		await Group.findByIdAndUpdate(previous._id, group)
