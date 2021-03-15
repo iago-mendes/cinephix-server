@@ -26,8 +26,18 @@ const users =
 		if (userExists)
 			return res.status(400).json({message: `User with email '${email}' already exists!`})
 
-		const user = await User.create({email, image, name, joinedAt: date, movies: [], tvshows: []})
-		return res.json(user)
+		const user =
+		{
+			email,
+			image,
+			name,
+			joinedAt: date,
+			movies: [],
+			tvshows: []
+		}
+
+		await User.create(user)
+		return res.status(201).send()
 	},
 
 	update: async (req: Request, res: Response) =>

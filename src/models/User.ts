@@ -56,7 +56,7 @@ const UserSchema = new mongoose.Schema(
 	joinedAt: {type: Date, default: Date.now()},
 	movies:
 	[{
-		movieId: {type: Number, required: true, unique: true},
+		movieId: {type: Number, required: true},
 
 		watched: {type: Boolean, required: true},
 		venue: {type: String, required: false},
@@ -72,7 +72,7 @@ const UserSchema = new mongoose.Schema(
 	}],
 	tvshows:
 	[{
-		tvshowId: {type: Number, required: true, unique: true},
+		tvshowId: {type: Number, required: true},
 
 		status: {type: String, required: true},
 		venue: {type: String, required: false},
