@@ -8,6 +8,7 @@ import {showMovie} from '../../services/tmdb/movies'
 import {showTvshow} from '../../services/tmdb/tvshows'
 import User from '../../models/User'
 import {formatUserImage} from '../../utils/formatImage'
+import sortByIndex from '../../utils/sortByIndex'
 
 const invalidIds = ['raw', 'participants', 'create']
 
@@ -289,6 +290,7 @@ const groups =
 		{
 			id: string,
 			name: string,
+			index?: number
 			description: string,
 			type: string,
 			media: Array<Media & ParticipantGuesses>,
@@ -301,6 +303,7 @@ const groups =
 			{
 				id: String(rawCategory._id),
 				name: rawCategory.name,
+				index: rawCategory.index,
 				description: rawCategory.description,
 				type: rawCategory.type
 			}
@@ -389,15 +392,14 @@ const groups =
 
 			categories.push(
 			{
-				id: String(rawCategory._id),
-				name: rawCategory.name,
-				description: rawCategory.description,
-				type: rawCategory.type,
+				...category,
 				media,
 				celebrities
 			})
 		})
 		await Promise.all(promise2)
+
+		categories.sort(sortByIndex)
 		
 		const event =
 		{
