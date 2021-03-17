@@ -5,6 +5,7 @@ import {showCelebrity} from '../services/tmdb/celebrities'
 import {showMovie} from '../services/tmdb/movies'
 import {showTvshow} from '../services/tmdb/tvshows'
 import {Media, Celebrity} from '../utils/interfaces'
+import sortByIndex from '../utils/sortByIndex'
 
 const events =
 {
@@ -88,11 +89,11 @@ const events =
 		if (!rawEvent.status.isOpen)
 			return res.status(401).json({message: `The event ${rawEvent.name} is not open!`})
 
-
 		let categories:
 		{
 			id: string
 			name: string
+			index?: number
 			description: string
 			type: string
 			media: Media[]
@@ -175,6 +176,7 @@ const events =
 			{
 				id: String(category._id),
 				name: category.name,
+				index: category.index,
 				description: category.description,
 				type: category.type,
 				media,
@@ -182,6 +184,8 @@ const events =
 			})
 		})
 		await Promise.all(promise)
+
+		categories = categories.sort(sortByIndex)
 
 		const event =
 		{
