@@ -62,7 +62,16 @@ const users =
 
 	list: async (req: Request, res: Response) =>
 	{
-		const users = await User.find()
+		const rawUsers = await User.find()
+
+		const users = rawUsers.map(user => (
+		{
+			email: user.email,
+			name: user.name,
+			image: user.image,
+			joinedAt: user.joinedAt
+		}))
+
 		return res.json(users)
 	},
 
@@ -72,7 +81,7 @@ const users =
 
 		const user = await User.findOne({email})
 		if (!user)
-			return res.status(404).json({message: 'user not found!'})
+			return res.status(404).json({message: 'User not found!'})
 
 		return res.json(user)
 	},
