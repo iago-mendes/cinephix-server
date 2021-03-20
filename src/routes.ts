@@ -11,6 +11,7 @@ import checkKey from './middlewares/checkKey'
 import events from './controllers/events'
 import groups from './controllers/groups'
 import groupParticipants from './controllers/groups/participants'
+import admin from './controllers/admin'
 
 const routes = express.Router()
 
@@ -75,5 +76,7 @@ routes.get('/groups/:urlId/participants/:email', checkKey, groupParticipants.sho
 routes.get('/groups/:urlId/participants/:email/raw', checkKey, groupParticipants.rawOne)
 routes.put('/groups/:urlId/participants/:email', checkKey, groupParticipants.update)
 routes.put('/groups/:urlId/participants/:email/ownership', checkKey, groupParticipants.changeOwnership)
+
+routes.get('/admin/stats', checkKey, admin.stats)
 
 export default routes
