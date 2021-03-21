@@ -296,6 +296,8 @@ const groups =
 			})
 			await Promise.all(promise2)
 
+			tmpPredictions.sort(sortByIndex)
+
 			participants.push(
 			{
 				...user,
