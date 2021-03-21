@@ -9,6 +9,7 @@ import {showTvshow} from '../../services/tmdb/tvshows'
 import User from '../../models/User'
 import {formatUserImage} from '../../utils/formatImage'
 import sortByIndex from '../../utils/sortByIndex'
+import sortByName from '../../utils/sortByName'
 
 const invalidIds = ['raw', 'participants', 'create']
 
@@ -418,6 +419,7 @@ const groups =
 		await Promise.all(promise2)
 
 		categories.sort(sortByIndex)
+		participants.sort(sortByName)
 		
 		const event =
 		{
