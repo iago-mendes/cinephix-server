@@ -1,5 +1,16 @@
 import mongoose from 'mongoose'
 
+export interface Participant
+{
+	email: string
+	isOwner: boolean
+	predictions: Array<
+	{
+		category: string
+		guess: number
+	}>
+}
+
 export type GroupType = mongoose.Document & 
 {
 	_id: string
@@ -8,16 +19,7 @@ export type GroupType = mongoose.Document &
 	banner?: string
 	event: string
 	description?: string
-	participants: Array<
-	{
-		email: string
-		isOwner: boolean
-		predictions: Array<
-		{
-			category: string
-			guess: number
-		}>
-	}>
+	participants: Participant[]
 }
 
 const GroupSchema = new mongoose.Schema(

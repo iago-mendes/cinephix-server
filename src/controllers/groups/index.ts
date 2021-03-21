@@ -1,6 +1,6 @@
 import {Request, Response} from 'express'
 
-import Group, {GroupType} from '../../models/Group'
+import Group, {GroupType, Participant} from '../../models/Group'
 import Event from '../../models/Event'
 import {Media, Celebrity} from '../../utils/interfaces'
 import {showCelebrity} from '../../services/tmdb/celebrities'
@@ -42,11 +42,28 @@ const groups =
 	update: async (req: Request, res: Response) =>
 	{
 		const {urlId} = req.params
-		const {nickname, banner, event, description, participants} = req.body
+		const {nickname, banner, event, description, participants: emptyParticipants}:
+		{
+			nickname: string
+			banner: string
+			event: string
+			description: string
+			participants: Participant[]
+		} = req.body
 
 		const previous = await Group.findOne({urlId})
 		if (!previous)
 			return res.status(404).json({message: 'Group not found!'})
+		
+		let participants: Participant[] = emptyParticipants.map(emptyParticipant =>
+		{
+			const previousParticipant = previous.participants.find(({email}) => email === emptyParticipant.email)
+
+			if (previousParticipant)
+				return previousParticipant
+			else
+				return emptyParticipant
+		})
 
 		const group =
 		{
@@ -54,7 +71,7 @@ const groups =
 			banner: banner ? banner : previous.banner,
 			event: event ? event : previous.event,
 			description: description ? description : previous.description,
-			participants: participants ? participants : previous.participants
+			participants
 		}
 
 		await Group.findByIdAndUpdate(previous._id, group)
