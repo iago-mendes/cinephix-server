@@ -26,6 +26,7 @@ export type EventType = mongoose.Document &
 			media: number
 			mediaType: string // 'movie' | 'tvshow'
 		}>
+		result?: number
 	}>
 }
 

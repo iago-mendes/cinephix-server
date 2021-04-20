@@ -1,11 +1,11 @@
 import {Request, Response} from 'express'
 
-import Event from '../models/Event'
-import {showCelebrity} from '../services/tmdb/celebrities'
-import {showMovie} from '../services/tmdb/movies'
-import {showTvshow} from '../services/tmdb/tvshows'
-import {Media, Celebrity} from '../utils/interfaces'
-import sortByIndex from '../utils/sortByIndex'
+import Event from '../../models/Event'
+import {showCelebrity} from '../../services/tmdb/celebrities'
+import {showMovie} from '../../services/tmdb/movies'
+import {showTvshow} from '../../services/tmdb/tvshows'
+import {Media, Celebrity} from '../../utils/interfaces'
+import sortByIndex from '../../utils/sortByIndex'
 
 const events =
 {
