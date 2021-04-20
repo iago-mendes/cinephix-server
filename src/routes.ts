@@ -12,6 +12,7 @@ import events from './controllers/events'
 import groups from './controllers/groups'
 import groupParticipants from './controllers/groups/participants'
 import admin from './controllers/admin'
+import eventsUtils from './controllers/events/utils'
 
 const routes = express.Router()
 
@@ -58,6 +59,8 @@ routes.get('/events', events.list)
 routes.get('/events/raw', checkKey, events.raw)
 routes.get('/events/:id', events.show)
 routes.get('/events/:id/raw', checkKey, events.rawOne)
+
+routes.get('/events/:eventId/categories', checkKey, eventsUtils.getCategoriesRaw)
 
 routes.post('/groups', checkKey, groups.create)
 routes.get('/groups', checkKey, groups.list)
