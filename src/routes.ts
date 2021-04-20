@@ -61,6 +61,7 @@ routes.get('/events/:id', events.show)
 routes.get('/events/:id/raw', checkKey, events.rawOne)
 
 routes.get('/events/:eventId/categories', checkKey, eventsUtils.getCategoriesRaw)
+routes.post('/events/:eventId/categories/results', checkKey, eventsUtils.setResults)
 
 routes.post('/groups', checkKey, groups.create)
 routes.get('/groups', checkKey, groups.list)
