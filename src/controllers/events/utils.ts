@@ -20,7 +20,7 @@ const eventsUtils =
 				name: category.name,
 				description: category.description,
 				type: category.type,
-				resultId: category.result || 'No result',
+				resultId: category.result,
 				mediaIds: category.media,
 				celebrityIds: category.celebrities.map(celebrity => celebrity.celebrity)
 			}))
@@ -45,22 +45,31 @@ const eventsUtils =
 		if (!event)
 			return res.status(404).json({message: 'Event not found!'})
 		
-		let categories = event.categories
+		const categories = event.categories.map(category =>
+			{
+				const resultObj = results.find(({categoryId}) => categoryId === String(category._id))
+				const result = resultObj
+					? resultObj.resultId
+					: category.result
 
-		results.map(({categoryId, resultId}) =>
-		{
-			let categoryIndex = categories.findIndex(({_id}) => categoryId == String(_id))
-
-			if (categoryIndex >= 0)
-				categories[categoryIndex].result = resultId
-		})
+				return {
+					_id: category._id,
+					name: category.name,
+					index: category.index,
+					description: category.description,
+					type: category.type,
+					media: category.media,
+					celebrities: category.celebrities,
+					result
+				}
+			})
 
 		let status = event.status
 		status.hasResults = hasResults
 
-		const response = await Event.updateOne({id: event.id}, {status, categories})
+		const updatedEvent = await Event.findByIdAndUpdate(event._id, {status, categories}, {new: true})
 		
-		return res.json(response)
+		return res.json(updatedEvent)
 	}
 }
 

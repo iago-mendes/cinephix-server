@@ -53,7 +53,8 @@ const EventSchema = new mongoose.Schema(
 			celebrity: {type: Number, required: true},
 			media: {type: Number},
 			mediaType: {type: String}
-		}]
+		}],
+		result: {type: Number}
 	}]
 })
 EventSchema.index({name: 'text'})
