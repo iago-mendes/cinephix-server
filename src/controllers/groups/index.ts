@@ -165,6 +165,8 @@ const groups =
 			email: string,
 			isOwner: boolean,
 			predictions: Prediction[]
+			points: number
+			isWinner: boolean
 		}> = []
 
 		interface ParticipantGuesses
@@ -182,9 +184,15 @@ const groups =
 			guess: number
 		}> = []
 
+		let winnerParticipant =
+		{
+			email: '',
+			points: -1
+		}
 		const promise = rawGroup.participants.map(async participant =>
 		{
 			let tmpPredictions: Prediction[] = []
+			let points = 0
 
 			const rawUser = await User.findOne({email: participant.email})
 			const user =
@@ -236,7 +244,8 @@ const groups =
 							overview: media.overview,
 							date: ids.mediaType === 'movie' ? media.date : media.startDate,
 							type: ids.mediaType
-						}
+						},
+						isResult: rawCategory.result == celebrity.id
 					}
 
 					tmpPredictions.push(
@@ -258,7 +267,8 @@ const groups =
 						title: movie.title,
 						overview: movie.overview,
 						date: movie.date,
-						type: 'movie'
+						type: 'movie',
+						isResult: rawCategory.result == movie.id
 					}
 
 					tmpPredictions.push(
@@ -280,7 +290,8 @@ const groups =
 						title: tvshow.title,
 						overview: tvshow.overview,
 						date: tvshow.startDate,
-						type: 'tvshow'
+						type: 'tvshow',
+						isResult: rawCategory.result == tvshow.id
 					}
 				}
 
@@ -295,16 +306,28 @@ const groups =
 					})
 				else
 					participantGuesses[existingIndex].participants.push(user)
+				
+				if (rawCategory.result == prediction.guess)
+					points++
 			})
 			await Promise.all(promise2)
 
 			tmpPredictions.sort(sortPredictionsByIndex)
 
+			if (points > winnerParticipant.points)
+				winnerParticipant =
+				{
+					email: participant.email,
+					points
+				}
+
 			participants.push(
 			{
 				...user,
 				isOwner: participant.isOwner,
-				predictions: tmpPredictions
+				predictions: tmpPredictions,
+				points,
+				isWinner: false
 			})
 		})
 		await Promise.all(promise)
@@ -361,9 +384,10 @@ const groups =
 							title: media.title,
 							overview: media.overview,
 							date: mediaType === 'movie' ? media.date : media.startDate,
-							type: mediaType
+							type: mediaType,
 						},
-						participants: participantGuess ? participantGuess.participants : []
+						participants: participantGuess ? participantGuess.participants : [],
+						isResult: rawCategory.result == celebrityId
 					})
 				})
 				await Promise.all(promise3)
@@ -385,7 +409,8 @@ const groups =
 						overview: movie.overview,
 						date: movie.date,
 						type: 'movie',
-						participants: participantGuess ? participantGuess.participants : []
+						participants: participantGuess ? participantGuess.participants : [],
+						isResult: rawCategory.result == id
 					})
 				})
 				await Promise.all(promise3)
@@ -407,7 +432,8 @@ const groups =
 						overview: tvshow.overview,
 						date: tvshow.startDate,
 						type: 'tvshow',
-						participants: participantGuess ? participantGuess.participants : []
+						participants: participantGuess ? participantGuess.participants : [],
+						isResult: rawCategory.result == id
 					})
 				})
 				await Promise.all(promise3)
@@ -422,8 +448,34 @@ const groups =
 		})
 		await Promise.all(promise2)
 
+		if (rawEvent.status.hasResults)
+			participants = participants.map(participant =>
+			{
+				let tmpParticipant = participant
+
+				if (tmpParticipant.email === winnerParticipant.email)
+					tmpParticipant.isWinner = true
+				
+				return tmpParticipant
+			})
+
 		categories.sort(sortByIndex)
-		participants.sort(sortByName)
+		participants.sort(
+			rawEvent.status.hasResults
+			? (a,b) =>
+				{
+					if (a.isWinner)
+						return -1
+					if (b.isWinner)
+						return 1
+					
+					if (a.points > b.points)
+						return -1
+					else
+						return 1
+				}
+			: sortByName
+		)
 		
 		const event =
 		{
