@@ -130,7 +130,8 @@ const events =
 							overview: media.overview,
 							date: mediaType === 'movie' ? media.date : media.startDate,
 							type: mediaType
-						}
+						},
+						isResult: category.result == celebrityId
 					})
 				})
 				await Promise.all(promise2)
@@ -148,7 +149,8 @@ const events =
 						title: movie.title,
 						overview: movie.overview,
 						date: movie.date,
-						type: 'movie'
+						type: 'movie',
+						isResult: category.result == id
 					})
 				})
 				await Promise.all(promise2)
@@ -166,7 +168,8 @@ const events =
 						title: tvshow.title,
 						overview: tvshow.overview,
 						date: tvshow.startDate,
-						type: 'tvshow'
+						type: 'tvshow',
+						isResult: category.result == id
 					})
 				})
 				await Promise.all(promise2)

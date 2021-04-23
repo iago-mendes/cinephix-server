@@ -6,6 +6,7 @@ export interface Media
 	overview?: string
 	date?: string
 	type: string
+	isResult?: boolean
 }
 
 export interface Celebrity
@@ -17,4 +18,5 @@ export interface Celebrity
 		name?: string
 	},
 	media: Media
+	isResult?: boolean
 }
