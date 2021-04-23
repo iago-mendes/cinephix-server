@@ -171,12 +171,7 @@ const groups =
 
 		interface ParticipantGuesses
 		{
-			participants: Array<
-			{
-				image: string
-				name: string
-				email: string
-			}>
+			predictionsQuantity: number
 		}
 		let participantGuesses: Array<ParticipantGuesses &
 		{
@@ -189,6 +184,7 @@ const groups =
 			email: '',
 			points: -1
 		}
+
 		const promise = rawGroup.participants.map(async participant =>
 		{
 			let tmpPredictions: Prediction[] = []
@@ -302,10 +298,10 @@ const groups =
 					{
 						category: prediction.category,
 						guess: prediction.guess,
-						participants: [user]
+						predictionsQuantity: 1
 					})
 				else
-					participantGuesses[existingIndex].participants.push(user)
+					participantGuesses[existingIndex].predictionsQuantity++
 				
 				if (rawCategory.result == prediction.guess)
 					points++
@@ -386,7 +382,7 @@ const groups =
 							date: mediaType === 'movie' ? media.date : media.startDate,
 							type: mediaType,
 						},
-						participants: participantGuess ? participantGuess.participants : [],
+						predictionsQuantity: participantGuess ? participantGuess.predictionsQuantity : 0,
 						isResult: rawCategory.result == celebrityId
 					})
 				})
@@ -409,7 +405,7 @@ const groups =
 						overview: movie.overview,
 						date: movie.date,
 						type: 'movie',
-						participants: participantGuess ? participantGuess.participants : [],
+						predictionsQuantity: participantGuess ? participantGuess.predictionsQuantity : 0,
 						isResult: rawCategory.result == id
 					})
 				})
@@ -432,7 +428,7 @@ const groups =
 						overview: tvshow.overview,
 						date: tvshow.startDate,
 						type: 'tvshow',
-						participants: participantGuess ? participantGuess.participants : [],
+						predictionsQuantity: participantGuess ? participantGuess.predictionsQuantity : 0,
 						isResult: rawCategory.result == id
 					})
 				})
