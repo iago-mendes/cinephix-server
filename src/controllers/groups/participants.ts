@@ -276,7 +276,7 @@ const groupParticipants =
 		return res.json(participant)
 	},
 
-	update: async (req: Request, res: Response) =>
+	makePredictions: async (req: Request, res: Response) =>
 	{
 		const {urlId, email} = req.params
 		const {predictions} = req.body
@@ -287,6 +287,13 @@ const groupParticipants =
 		const group = await Group.findOne({urlId})
 		if (!group)
 			return res.status(404).json({message: 'Group not found!'})
+		
+		const event = await Event.findOne({id: group.event})
+		if (!event)
+			return res.status(404).json({message: 'Event not found!'})
+		
+		if (event.status.hasResults === true)
+			return res.status(403).json({message: `${event.name} has results, so you cannot change your predictions!`})
 
 		let participants = group.participants
 		const index = participants.findIndex(participant => participant.email === String(email))
