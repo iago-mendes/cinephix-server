@@ -1,6 +1,6 @@
-import getCacheClient from "./client"
-import getKey from "./getKey"
-import validTypes from "./validTypes"
+import getCacheClient from './client'
+import getKey from './getKey'
+import validTypes from './validTypes'
 
 function saveCache(type: string, id: number, data: unknown)
 {
