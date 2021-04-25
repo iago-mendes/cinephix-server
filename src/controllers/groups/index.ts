@@ -489,6 +489,7 @@ const groups =
 			name: rawEvent.name,
 			color: rawEvent.color,
 			description: rawEvent.description,
+			status: rawEvent.status,
 			categories
 		}
 		
