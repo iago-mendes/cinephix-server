@@ -2,13 +2,58 @@ import {MovieCredits, MovieDetails} from '../../models/Movie'
 import formatImage from '../../utils/formatImage'
 import sortByPopularity from '../../utils/sortByPopularity'
 import api from '../api'
+import getCache from '../cache/get'
+import saveCache from '../cache/save'
+
+interface Movie
+{
+	id?: number
+	title?: string
+	image?: string
+	overview?: string
+	status?: string
+	date?: string
+	rating?: number
+	collection?:
+	{
+		id: number
+		name: string
+		image: string
+	}
+	genres?: Array<
+	{
+		id?: number
+    name?: string
+	}>
+	credits:
+	{
+		cast: Array<
+		{
+			id?: number
+			name?: string
+			image?: string
+			character?: string
+		}>
+		crew: Array<
+		{
+			id?: number
+			name?: string
+			image?: string
+			department?: string
+		}>
+	}
+}
 
 export const showMovie = async (id: number) =>
 {
+	const cachedMovie: Movie | null = await getCache('movie', id)
+	if (cachedMovie !== null)
+		return cachedMovie
+
 	const {data: rawMovie}:{data: MovieDetails} = await api.get(`/movie/${id}`)
 	const {data: credits}:{data: MovieCredits} = await api.get(`/movie/${id}/credits`)
 
-	const movie =
+	const movie: Movie =
 	{
 		id: rawMovie.id,
 		title: rawMovie.title,
@@ -42,6 +87,8 @@ export const showMovie = async (id: number) =>
 			}))
 		}
 	}
+
+	saveCache('movie', id, movie)
 
 	return movie
 }

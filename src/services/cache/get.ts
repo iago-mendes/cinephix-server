@@ -7,7 +7,7 @@ import validTypes from './validTypes'
 async function getCache(type: string, id: number)
 {
 	if (!validTypes.includes(type))
-		return {ok: false, data: null}
+		return null
 	
 	const key = getKey(type, id)
 
@@ -16,11 +16,11 @@ async function getCache(type: string, id: number)
 	const value = await getAsync(key)
 
 	if (!value)
-		return {ok: true, data: null}
+		return null
 	
 	const data = JSON.parse(value)
 	
-	return {ok: true, data}
+	return data
 }
 
 export default getCache

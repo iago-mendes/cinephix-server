@@ -2,13 +2,56 @@ import {TvCredits, TvDetails} from '../../models/Tv'
 import formatImage from '../../utils/formatImage'
 import sortByPopularity from '../../utils/sortByPopularity'
 import api from '../api'
+import getCache from '../cache/get'
+import saveCache from '../cache/save'
+
+interface Tvshow
+{
+	id?: number
+	title?: string
+	image?: string
+	overview?: string
+	rating?: number
+	status?: string
+	inProduction?: boolean
+	startDate?: string
+	endDate?: string
+	seasonsNumber?: number
+	episodesNumber?: number
+	genres?: Array<
+	{
+		id?: number
+    name?: string
+	}>
+	credits:
+	{
+		cast: Array<
+		{
+			id?: number
+			name?: string
+			image?: string
+			character?: string
+		}>
+		crew: Array<
+		{
+			id?: number
+			name?: string
+			image?: string
+			department?: string
+		}>
+	}
+}
 
 export const showTvshow = async (id: number) =>
 {
+	const cachedTvshow: Tvshow | null = await getCache('tvshow', id)
+	if (cachedTvshow !== null)
+		return cachedTvshow
+
 	const {data: rawTvshow}:{data: TvDetails} = await api.get(`/tv/${id}`)
 	const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`)
 
-	const tvshow =
+	const tvshow: Tvshow =
 	{
 		id: rawTvshow.id,
 		title: rawTvshow.name,
@@ -40,6 +83,8 @@ export const showTvshow = async (id: number) =>
 			}))
 		}
 	}
+
+	saveCache('tvshow', id, tvshow)
 
 	return tvshow
 }
