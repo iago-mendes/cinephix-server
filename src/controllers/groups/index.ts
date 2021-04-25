@@ -145,7 +145,7 @@ const groups =
 		const rawEvent = await Event.findOne({id: rawGroup.event})
 		if (!rawEvent)
 			return res.status(404).json({message: 'Event not found!'})
-
+		
 		interface Prediction
 		{
 			category:
@@ -173,11 +173,13 @@ const groups =
 		{
 			predictionsQuantity: number
 		}
-		let participantGuesses: Array<ParticipantGuesses &
+		let participantGuesses:
 		{
-			category: string
-			guess: number
-		}> = []
+			[category: string]:
+			{
+				[guess: number]: ParticipantGuesses
+			}
+		} = {}
 
 		let winnerParticipant =
 		{
@@ -291,20 +293,23 @@ const groups =
 					}
 				}
 
-				const existingIndex = participantGuesses
-					.findIndex(({category, guess}) => category == prediction.category && guess == prediction.guess)
-				if (existingIndex < 0)
-					participantGuesses.push(
-					{
-						category: prediction.category,
-						guess: prediction.guess,
-						predictionsQuantity: 1
-					})
-				else
-					participantGuesses[existingIndex].predictionsQuantity++
+				const categoryParticipantGuesses = participantGuesses[prediction.category]
+				const hasExistingParticipantGuesses = categoryParticipantGuesses
+					? categoryParticipantGuesses[prediction.guess] != undefined
+					: false
 				
-				if (rawCategory.result == prediction.guess)
-					points++
+				if (hasExistingParticipantGuesses)
+					participantGuesses[prediction.category][prediction.guess].predictionsQuantity++
+				else if (categoryParticipantGuesses != undefined)
+					participantGuesses[prediction.category][prediction.guess] =
+					{
+						predictionsQuantity: 1
+					}
+				else
+					participantGuesses[prediction.category] =
+					{
+						[prediction.guess]: {predictionsQuantity: 1}
+					}
 			})
 			await Promise.all(promise2)
 
@@ -353,6 +358,8 @@ const groups =
 			let media: Array<Media & ParticipantGuesses> = []
 			let celebrities: Array<Celebrity & ParticipantGuesses> = []
 
+			const categoryParticipantGuesses = participantGuesses[category.id]
+
 			if (category.type === 'celebrities')
 			{
 				const promise3 = rawCategory.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
@@ -362,8 +369,9 @@ const groups =
 						? await showMovie(mediaId)
 						: await showTvshow(mediaId)
 					
-					const participantGuess = participantGuesses
-						.find(({category: id, guess}) => id == category.id && guess == celebrityId)
+					const participantGuess = categoryParticipantGuesses
+						? categoryParticipantGuesses[celebrityId]
+						: {predictionsQuantity: 0}
 					
 					celebrities.push(
 					{
@@ -394,8 +402,9 @@ const groups =
 				{
 					const movie = await showMovie(id)
 
-					const participantGuess = participantGuesses
-						.find(({category: categoryId, guess}) => categoryId == category.id && guess == id)
+					const participantGuess = categoryParticipantGuesses
+						? categoryParticipantGuesses[id]
+						: {predictionsQuantity: 0}
 					
 					media.push(
 					{
@@ -417,8 +426,9 @@ const groups =
 				{
 					const tvshow = await showTvshow(id)
 
-					const participantGuess = participantGuesses
-						.find(({category: categoryId, guess}) => categoryId == category.id && guess == id)
+					const participantGuess = categoryParticipantGuesses
+						? categoryParticipantGuesses[id]
+						: {predictionsQuantity: 0}
 					
 					media.push(
 					{
