@@ -310,6 +310,9 @@ const groups =
 					{
 						[prediction.guess]: {predictionsQuantity: 1}
 					}
+				
+				if (prediction.guess == rawCategory.result)
+					points++
 			})
 			await Promise.all(promise2)
 
