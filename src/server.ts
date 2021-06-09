@@ -11,7 +11,7 @@ import errorHandler from './errors/handler'
 const app = express()
 dotenv.config()
 
-app.use(cors())
+app.use(cors({exposedHeaders: '*'}))
 app.use(express.json())
 
 mongoose.connect(
