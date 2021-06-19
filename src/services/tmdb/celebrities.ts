@@ -1,4 +1,4 @@
-import {PersonCombinedCredits, PersonDetails} from '../../models/Person'
+import {defaultPersonCombinedCredits, defaultPersonDetails, PersonCombinedCredits, PersonDetails} from '../../models/Person'
 import formatImage from '../../utils/formatImage'
 import sortByPopularity from '../../utils/sortByPopularity'
 import api from '../api'
@@ -45,8 +45,21 @@ export const showCelebrity = async (id: number) =>
 	if (cachedCelebrity !== null)
 		return cachedCelebrity
 
-	const {data: rawCelebrity}:{data: PersonDetails} = await api.get(`/person/${id}`)
-	const {data: credits}:{data: PersonCombinedCredits} = await api.get(`/person/${id}/combined_credits`)
+	let rawCelebrity: PersonDetails
+	let credits: PersonCombinedCredits
+
+	try
+	{
+		const {data: celebrityData}:{data: PersonDetails} = await api.get(`/person/${id}`)
+		rawCelebrity = celebrityData
+		const {data: creditsData}:{data: PersonCombinedCredits} = await api.get(`/person/${id}/combined_credits`)
+		credits = creditsData
+	}
+	catch
+	{
+		rawCelebrity = defaultPersonDetails
+		credits = defaultPersonCombinedCredits
+	}
 
 	const celebrity: Celebrity =
 	{

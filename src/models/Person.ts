@@ -57,6 +57,24 @@ export interface PersonDetails
 	homepage?: string
 }
 
+export const defaultPersonDetails: PersonDetails =
+{
+	id: 0,
+	name: 'Not found',
+	birthday: '',
+	known_for_department: '',
+	deathday: '',
+	also_known_as: [],
+	gender: 0,
+	biography: '',
+	popularity: 0,
+	place_of_birth: '',
+	profile_path: '',
+	adult: true,
+	imdb_id: '',
+	homepage: ''
+}
+
 export interface PersonCombinedCredits
 {
 	id: number
@@ -111,4 +129,11 @@ export interface PersonCombinedCredits
 		adult?: boolean
 		release_date?: string
 	}>
+}
+
+export const defaultPersonCombinedCredits: PersonCombinedCredits =
+{
+	id: 0,
+	cast: [],
+	crew: []
 }
