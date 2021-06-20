@@ -44,14 +44,14 @@ interface Movie
 	}
 }
 
-export const showMovie = async (id: number) =>
+export const showMovie = async (id: number, language?: string) =>
 {
-	const cachedMovie: Movie | null = await getCache('movie', id)
+	const cachedMovie: Movie | null = await getCache('movie', id, language)
 	if (cachedMovie !== null)
 		return cachedMovie
 
-	const {data: rawMovie}:{data: MovieDetails} = await api.get(`/movie/${id}`)
-	const {data: credits}:{data: MovieCredits} = await api.get(`/movie/${id}/credits`)
+	const {data: rawMovie}:{data: MovieDetails} = await api.get(`/movie/${id}`, {params: {language}})
+	const {data: credits}:{data: MovieCredits} = await api.get(`/movie/${id}/credits`, {params: {language}})
 
 	const movie: Movie =
 	{
@@ -88,7 +88,7 @@ export const showMovie = async (id: number) =>
 		}
 	}
 
-	saveCache('movie', id, movie)
+	saveCache('movie', id, movie, language)
 
 	return movie
 }

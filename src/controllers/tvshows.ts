@@ -5,11 +5,12 @@ import {TvSearchPaginated, TvTrendingPaginated} from '../models/Tv'
 import formatImage from '../utils/formatImage'
 import {showTvshow} from '../services/tmdb/tvshows'
 
-export default
+const tvshowsController =
 {
 	list: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {search, page: tmpPage} = req.query
+		const {language} = req.query
 
 		let list: Array<
 		{
@@ -29,7 +30,10 @@ export default
 
 		if (search && search !== '')
 		{
-			const {data: tvshows}:{data: TvSearchPaginated} = await api.get('/search/tv', {params: {query: search, page}})
+			const {data: tvshows}:{data: TvSearchPaginated} = await api.get(
+				'/search/tv',
+				{params: {query: search, page, language}}
+			)
 
 			list = tvshows.results.map(tvshow => (
 			{
@@ -45,7 +49,10 @@ export default
 		}
 		else
 		{
-			const {data: tvshows}:{data: TvTrendingPaginated} = await api.get('/trending/tv/day', {params: {page}})
+			const {data: tvshows}:{data: TvTrendingPaginated} = await api.get(
+				'/trending/tv/day',
+				{params: {page, language}}
+			)
 
 			list = tvshows.results.map(tvshow => (
 			{
@@ -66,8 +73,11 @@ export default
 	show: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {id} = req.params
-		const tvshow = await showTvshow(Number(id))
+		const {language} = req.query
+		const tvshow = await showTvshow(Number(id), String(language))
 
 		return res.json(tvshow)
 	}
 }
+
+export default tvshowsController

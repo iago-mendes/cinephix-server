@@ -42,14 +42,14 @@ interface Tvshow
 	}
 }
 
-export const showTvshow = async (id: number) =>
+export const showTvshow = async (id: number, language?: string) =>
 {
-	const cachedTvshow: Tvshow | null = await getCache('tvshow', id)
+	const cachedTvshow: Tvshow | null = await getCache('tvshow', id, language)
 	if (cachedTvshow !== null)
 		return cachedTvshow
 
-	const {data: rawTvshow}:{data: TvDetails} = await api.get(`/tv/${id}`)
-	const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`)
+	const {data: rawTvshow}:{data: TvDetails} = await api.get(`/tv/${id}`, {params: {language}})
+	const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`, {params: {language}})
 
 	const tvshow: Tvshow =
 	{
@@ -84,7 +84,7 @@ export const showTvshow = async (id: number) =>
 		}
 	}
 
-	saveCache('tvshow', id, tvshow)
+	saveCache('tvshow', id, tvshow, language)
 
 	return tvshow
 }

@@ -2,12 +2,12 @@ import getCacheClient from './client'
 import getKey from './getKey'
 import validTypes from './validTypes'
 
-function saveCache(type: string, id: number, data: unknown)
+function saveCache(type: string, id: number, data: unknown, language?: string)
 {
 	if (!validTypes.includes(type))
 		return {ok: false}
 	
-	const key = getKey(type, id)
+	const key = getKey(type, id, language)
 	const exTime = 24 * 60 * 60 // 24h
 	const value = JSON.stringify(data)
 	

@@ -81,6 +81,7 @@ const events =
 	show: async (req: Request, res: Response) =>
 	{
 		const {id} = req.params
+		const {language} = req.query
 
 		const rawEvent = await Event.findOne({id})
 		if (!rawEvent)
@@ -109,7 +110,7 @@ const events =
 			{
 				const promise2 = category.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
 				{
-					const celebrity = await showCelebrity(celebrityId)
+					const celebrity = await showCelebrity(celebrityId, String(language))
 					const media: any = mediaType === 'movie'
 						? await showMovie(mediaId)
 						: await showTvshow(mediaId)
@@ -140,7 +141,7 @@ const events =
 			{
 				const promise2 = category.media.map(async id =>
 				{
-					const movie = await showMovie(id)
+					const movie = await showMovie(id, String(language))
 
 					media.push(
 					{
@@ -159,7 +160,7 @@ const events =
 			{
 				const promise2 = category.media.map(async id =>
 				{
-					const tvshow = await showTvshow(id)
+					const tvshow = await showTvshow(id, String(language))
 					
 					media.push(
 					{

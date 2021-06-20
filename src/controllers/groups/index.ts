@@ -137,6 +137,7 @@ const groups =
 	show: async (req: Request, res: Response) =>
 	{
 		const {urlId} = req.params
+		const {language} = req.query
 
 		const rawGroup = await Group.findOne({urlId})
 		if (!rawGroup)
@@ -217,7 +218,7 @@ const groups =
 
 				if (category.type === 'celebrities')
 				{
-					const celebrity = await showCelebrity(prediction.guess)
+					const celebrity = await showCelebrity(prediction.guess, String(language))
 					const ids = rawCategory.celebrities.find(({celebrity: id}) => String(id) == String(celebrity.id))
 					if (!ids)
 						return
@@ -254,7 +255,7 @@ const groups =
 				}
 				else if (category.type === 'movies')
 				{
-					const movie = await showMovie(prediction.guess)
+					const movie = await showMovie(prediction.guess, String(language))
 					if (!movie)
 						return
 					
@@ -277,7 +278,7 @@ const groups =
 				}
 				else if (category.type === 'tvshows')
 				{
-					const tvshow = await showTvshow(prediction.guess)
+					const tvshow = await showTvshow(prediction.guess, String(language))
 					if (!tvshow)
 						return
 
@@ -367,7 +368,7 @@ const groups =
 			{
 				const promise3 = rawCategory.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
 				{
-					const celebrity = await showCelebrity(celebrityId)
+					const celebrity = await showCelebrity(celebrityId, String(language))
 					const media: any = mediaType === 'movie'
 						? await showMovie(mediaId)
 						: await showTvshow(mediaId)
@@ -403,7 +404,7 @@ const groups =
 			{
 				const promise3 = rawCategory.media.map(async id =>
 				{
-					const movie = await showMovie(id)
+					const movie = await showMovie(id, String(language))
 
 					const participantGuess = categoryParticipantGuesses
 						? categoryParticipantGuesses[id]
@@ -427,7 +428,7 @@ const groups =
 			{
 				const promise3 = rawCategory.media.map(async id =>
 				{
-					const tvshow = await showTvshow(id)
+					const tvshow = await showTvshow(id, String(language))
 
 					const participantGuess = categoryParticipantGuesses
 						? categoryParticipantGuesses[id]

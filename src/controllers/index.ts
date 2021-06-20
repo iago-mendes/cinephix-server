@@ -58,7 +58,7 @@ interface All
 
 export async function home(req: Request, res: Response, next: NextFunction)
 {
-	const {search, page: tmpPage} = req.query
+	const {search, page: tmpPage, language} = req.query
 
 	let list: any = []
 
@@ -70,8 +70,8 @@ export async function home(req: Request, res: Response, next: NextFunction)
 		return res.status(400).json({message: 'Your search query has more than 100 characters!'})
 
 	const {data: all}:{data: All} = (search && search !== '')
-		? await api.get('/search/multi', {params: {query: search, page}})
-		: await api.get('/trending/all/day', {params: {page}})
+		? await api.get('/search/multi', {params: {query: search, page, language}})
+		: await api.get('/trending/all/day', {params: {page, language}})
 
 	all.results.map(item =>
 	{

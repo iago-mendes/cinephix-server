@@ -5,11 +5,12 @@ import {MovieSearchPaginated, MovieTrendingPaginated} from '../models/Movie'
 import formatImage from '../utils/formatImage'
 import {showMovie} from '../services/tmdb/movies'
 
-export default
+const moviesController =
 {
 	list: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {search, page: tmpPage} = req.query
+		const {language} = req.query
 
 		let list: Array<
 		{
@@ -29,7 +30,10 @@ export default
 
 		if (search && search !== '')
 		{
-			const {data: movies}:{data: MovieSearchPaginated} = await api.get('/search/movie', {params: {query: search, page}})
+			const {data: movies}:{data: MovieSearchPaginated} = await api.get(
+				'/search/movie',
+				{params: {query: search, page, language}}
+			)
 
 			list = movies.results.map(movie => (
 			{
@@ -45,7 +49,10 @@ export default
 		}
 		else
 		{
-			const {data: movies}:{data: MovieTrendingPaginated} = await api.get('/trending/movie/day', {params: {page}})
+			const {data: movies}:{data: MovieTrendingPaginated} = await api.get(
+				'/trending/movie/day',
+				{params: {page, language}}
+			)
 
 			list = movies.results.map(movie => (
 			{
@@ -66,9 +73,12 @@ export default
 	show: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {id} = req.params
+		const {language} = req.query
 
-		const movie = await showMovie(Number(id))
+		const movie = await showMovie(Number(id), String(language))
 
 		return res.json(movie)
 	}
 }
+
+export default moviesController

@@ -144,6 +144,7 @@ const groupParticipants =
 	show: async (req: Request, res: Response) =>
 	{
 		const {urlId, email} = req.params
+		const {language} = req.query
 
 		if (!email)
 			return res.status(400).json({message: 'You need to provide an email!'})
@@ -187,7 +188,7 @@ const groupParticipants =
 			{
 				const promise2 = category.celebrities.map(async ({celebrity: celebrityId, media: mediaId, mediaType}) =>
 				{
-					const celebrity = await showCelebrity(celebrityId)
+					const celebrity = await showCelebrity(celebrityId, String(language))
 					const media: any = mediaType === 'movie'
 						? await showMovie(mediaId)
 						: await showTvshow(mediaId)
@@ -217,7 +218,7 @@ const groupParticipants =
 			{
 				const promise2 = category.media.map(async id =>
 				{
-					const movie = await showMovie(id)
+					const movie = await showMovie(id, String(language))
 
 					media.push(
 					{
@@ -235,7 +236,7 @@ const groupParticipants =
 			{
 				const promise2 = category.media.map(async id =>
 				{
-					const tvshow = await showTvshow(id)
+					const tvshow = await showTvshow(id, String(language))
 					
 					media.push(
 					{

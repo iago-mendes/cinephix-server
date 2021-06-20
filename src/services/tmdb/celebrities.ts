@@ -39,9 +39,9 @@ interface Celebrity
 	}
 }
 
-export const showCelebrity = async (id: number) =>
+export const showCelebrity = async (id: number, language?: string) =>
 {
-	const cachedCelebrity: Celebrity | null = await getCache('celebrity', id)
+	const cachedCelebrity: Celebrity | null = await getCache('celebrity', id, language)
 	if (cachedCelebrity !== null)
 		return cachedCelebrity
 
@@ -50,9 +50,12 @@ export const showCelebrity = async (id: number) =>
 
 	try
 	{
-		const {data: celebrityData}:{data: PersonDetails} = await api.get(`/person/${id}`)
+		const {data: celebrityData}:{data: PersonDetails} = await api.get(`/person/${id}`, {params: {language}})
 		rawCelebrity = celebrityData
-		const {data: creditsData}:{data: PersonCombinedCredits} = await api.get(`/person/${id}/combined_credits`)
+		const {data: creditsData}:{data: PersonCombinedCredits} = await api.get(
+			`/person/${id}/combined_credits`,
+			{params: {language}}
+		)
 		credits = creditsData
 	}
 	catch
@@ -95,7 +98,7 @@ export const showCelebrity = async (id: number) =>
 		}
 	}
 
-	saveCache('celebrity', id, celebrity)
+	saveCache('celebrity', id, celebrity, language)
 
 	return celebrity
 }

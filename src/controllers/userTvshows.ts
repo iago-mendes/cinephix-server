@@ -1,12 +1,9 @@
-import {Request, Response, NextFunction} from 'express'
-import {TvCredits, TvDetails} from '../models/Tv'
+import {Request, Response} from 'express'
 
 import User from '../models/User'
-import api from '../services/api'
-import formatImage from '../utils/formatImage'
-import sortByPopularity from '../utils/sortByPopularity'
 import validVenues from '../../db/venues.json'
 import validStatus from '../../db/status.json'
+import { showTvshow } from '../services/tmdb/tvshows'
 
 interface Ratings
 {
@@ -27,9 +24,9 @@ interface ListedTvshow
 	ratings: Ratings
 }
 
-export default
+const userTvshowsController =
 {
-	add: async (req: Request, res: Response, next: NextFunction) =>
+	add: async (req: Request, res: Response) =>
 	{
 		const {email} = req.params
 		const {id, status, venue, ratings}:
@@ -82,7 +79,7 @@ export default
 		return res.json(tvshow)
 	},
 
-	edit: async (req: Request, res: Response, next: NextFunction) =>
+	edit: async (req: Request, res: Response) =>
 	{
 		const {email, id: tmpId} = req.params
 		const {status, statusIndex, venue, ratings}:
@@ -156,7 +153,7 @@ export default
 		return res.json(tvshow)
 	},
 
-	remove: async (req: Request, res: Response, next: NextFunction) =>
+	remove: async (req: Request, res: Response) =>
 	{
 		const {email, id: tmpId} = req.params
 		const id = Number(tmpId)
@@ -185,9 +182,10 @@ export default
 		return res.json({message: 'tv show was removed!'})
 	},
 
-	list: async (req: Request, res: Response, next: NextFunction) =>
+	list: async (req: Request, res: Response) =>
 	{
 		const {email} = req.params
+		const {language} = req.query
 
 		const user = await User.findOne({email})
 		if (!user)
@@ -197,13 +195,13 @@ export default
 
 		const promise = user.tvshows.map(async tvshow =>
 		{
-			const {data}:{data: TvDetails} = await api.get(`/tv/${tvshow.tvshowId}`)
+			const data = await showTvshow(tvshow.tvshowId, String(language))
 
 			tvshows[Number(data.id)] =
 			{
 				id: data.id,
-				image: formatImage(data.poster_path),
-				title: data.name,
+				image: data.image,
+				title: data.title,
 				venue: tvshow.venue,
 				ratings: tvshow.ratings || {}
 			}
@@ -226,9 +224,10 @@ export default
 		return res.json(list)
 	},
 
-	show: async (req: Request, res: Response, next: NextFunction) =>
+	show: async (req: Request, res: Response) =>
 	{
 		const {email, id: tmpId} = req.params
+		const {language} = req.query
 		const id = Number(tmpId)
 
 		const user = await User.findOne({email})
@@ -239,43 +238,11 @@ export default
 		if (!tvshow)
 			return res.status(404).json({message: 'tv show not found!'})
 
-		const {data}:{data: TvDetails} = await api.get(`/tv/${id}`)
-		const {data: credits}:{data: TvCredits} = await api.get(`/tv/${id}/credits`)
+		const data = await showTvshow(id, String(language))
 
 		return res.json(
 		{
-			data:
-			{
-				id: data.id,
-				title: data.name,
-				image: formatImage(data.poster_path),
-				overview: data.overview,
-				rating: data.vote_average,
-				status: data.status,
-				inProduction: data.in_production,
-				startDate: data.first_air_date,
-				endDate: data.last_air_date,
-				seasonsNumber: data.number_of_seasons,
-				episodesNumber: data.number_of_episodes,
-				genres: data.genres,
-				credits:
-				{
-					cast: credits.cast.sort(sortByPopularity).map(person => (
-					{
-						id: person.id,
-						name: person.name,
-						image: formatImage(person.profile_path),
-						character: person.character
-					})),
-					crew: credits.crew.sort(sortByPopularity).map(person => (
-					{
-						id: person.id,
-						name: person.name,
-						image: formatImage(person.profile_path),
-						department: person.department
-					}))
-				}
-			},
+			data,
 			status: tvshow.status,
 			venue: tvshow.venue,
 			ratings: tvshow.ratings
@@ -303,3 +270,5 @@ export default
 		return res.send()
 	}
 }
+
+export default userTvshowsController

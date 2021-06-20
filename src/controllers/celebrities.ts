@@ -5,11 +5,12 @@ import {PersonListPaginated} from '../models/Person'
 import formatImage from '../utils/formatImage'
 import {showCelebrity} from '../services/tmdb/celebrities'
 
-export default
+const celebritiesController =
 {
 	list: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {search, page: tmpPage} = req.query
+		const {language} = req.query
 
 		let page = 1
 		if (tmpPage && Number(tmpPage) >= 1 && Number(tmpPage) <= 1000)
@@ -19,8 +20,8 @@ export default
 			return res.status(400).json({message: 'Your search query has more than 100 characters!'})
 
 		const {data: people}:{data: PersonListPaginated} = (search && search !== '')
-			? await api.get('/search/person', {params: {query: search, page}})
-			: await api.get('/trending/person/day', {params: {page}})
+			? await api.get('/search/person', {params: {query: search, page, language}})
+			: await api.get('/trending/person/day', {params: {page, language}})
 
 		const list = people.results.map(person =>
 		{
@@ -82,8 +83,11 @@ export default
 	show: async (req: Request, res: Response, next: NextFunction) =>
 	{
 		const {id} = req.params
-		const celebrity = await showCelebrity(Number(id))
+		const {language} = req.query
+		const celebrity = await showCelebrity(Number(id), String(language))
 
 		return res.json(celebrity)
 	}
 }
+
+export default celebritiesController
